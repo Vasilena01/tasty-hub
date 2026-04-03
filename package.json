@@ -1,13 +1,26 @@
 {
-  "name": "tasty-hub",
+  "name": "recipe-hub",
   "version": "1.0.0",
-  "description": "",
+  "description": "Full-stack recipe sharing application with meal planning and shopping lists",
   "main": "index.js",
   "scripts": {
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm start\"",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "recipe",
+    "meal-planning",
+    "react",
+    "node",
+    "postgresql"
+  ],
+  "author": "Vasilena Stanoyska",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
 }
