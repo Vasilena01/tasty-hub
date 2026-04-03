@@ -1,0 +1,35 @@
+{
+  "project_name": "Recipe Hub",
+  "workflow": {
+    "auto_commit": true,
+    "commit_strategy": "atomic",
+    "educational_mode": true,
+    "explain_react": true
+  },
+  "technology_stack": {
+    "frontend": {
+      "framework": "React",
+      "state_management": "Redux",
+      "routing": "React Router"
+    },
+    "backend": {
+      "runtime": "Node.js",
+      "framework": "Express.js",
+      "api_style": "REST"
+    },
+    "database": {
+      "type": "PostgreSQL",
+      "orm": "pg (node-postgres)"
+    },
+    "auth": {
+      "method": "JWT",
+      "password_hashing": "bcrypt"
+    }
+  },
+  "feature_scope": {
+    "core_features": true,
+    "notifications": true,
+    "social_following": true
+  },
+  "model_profile": "balanced"
+}
