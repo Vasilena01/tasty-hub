@@ -68,11 +68,13 @@ function App() {
 function HomePage() {
   return (
     <div className="home-page">
-      <h1>Welcome to Recipe Hub</h1>
-      <p>Your personal recipe sharing platform</p>
-      <div className="home-actions">
-        <Link to="/register" className="home-button primary">Get Started</Link>
-        <Link to="/login" className="home-button secondary">Login</Link>
+      <div className="hero-section">
+        <h1>Welcome to Recipe Hub</h1>
+        <p className="hero-tagline">Discover, share, and savor delicious recipes from around the world</p>
+        <div className="home-actions">
+          <Link to="/register" className="home-button primary">Get Started</Link>
+          <Link to="/login" className="home-button secondary">Login</Link>
+        </div>
       </div>
     </div>
   );
