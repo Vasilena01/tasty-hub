@@ -17,6 +17,12 @@ app.use(express.urlencoded({ extended: true }));
 // Serve uploaded files
 app.use('/uploads', express.static('uploads'));
 
+// Import routes
+const authRoutes = require('./routes/authRoutes');
+
+// Mount routes
+app.use('/api/auth', authRoutes);
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({

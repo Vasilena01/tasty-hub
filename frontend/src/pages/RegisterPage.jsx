@@ -19,7 +19,6 @@ const RegisterPage = () => {
 
   const { isAuthenticated, loading, error } = useSelector((state) => state.auth);
 
-  // D-36: Auto-login and redirect after registration success
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/dashboard', { replace: true });
@@ -40,7 +39,6 @@ const RegisterPage = () => {
   const validateForm = () => {
     const errors = [];
 
-    // D-05: Required fields
     if (!formData.username) errors.push('Username is required');
     if (!formData.email) errors.push('Email is required');
     if (!formData.password) errors.push('Password is required');
@@ -48,12 +46,10 @@ const RegisterPage = () => {
     if (!formData.first_name) errors.push('First name is required');
     if (!formData.last_name) errors.push('Last name is required');
 
-    // D-07: Password minimum 8 characters
     if (formData.password && formData.password.length < 8) {
       errors.push('Password must be at least 8 characters');
     }
 
-    // Password confirmation match
     if (formData.password && formData.passwordConfirm && formData.password !== formData.passwordConfirm) {
       errors.push('Passwords do not match');
     }
@@ -69,7 +65,6 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // D-09: Validation on submit only
     const errors = validateForm();
     if (errors.length > 0) {
       setValidationErrors(errors);
@@ -78,12 +73,10 @@ const RegisterPage = () => {
 
     setValidationErrors([]);
 
-    // Send to backend (without passwordConfirm)
     const { passwordConfirm, ...userData } = formData;
     dispatch(register(userData));
   };
 
-  // D-10: Display all errors at top
   const allErrors = [...validationErrors];
   if (error) allErrors.push(error);
 
@@ -92,7 +85,6 @@ const RegisterPage = () => {
       <div className="auth-container">
         <h1>Create Account</h1>
 
-        {/* D-10: All validation errors in list at top */}
         {allErrors.length > 0 && (
           <div className="error-message">
             <ul>

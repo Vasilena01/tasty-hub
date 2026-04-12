@@ -1,21 +1,48 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from './redux/slices/authSlice';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
+function Navigation() {
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/');
+  };
+
+  return (
+    <nav className="main-nav">
+      <Link to="/" className="nav-logo">Recipe Hub</Link>
+      <div className="nav-links">
+        {isAuthenticated ? (
+          <>
+            <Link to="/dashboard">Dashboard</Link>
+            <span className="user-name">{user?.username}</span>
+            <button onClick={handleLogout} className="logout-btn">Logout</button>
+          </>
+        ) : (
+          <>
+            <Link to="/login">Login</Link>
+            <Link to="/register">Register</Link>
+          </>
+        )}
+      </div>
+    </nav>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
       <div className="App">
-        <nav className="main-nav">
-          <Link to="/" className="nav-logo">Recipe Hub</Link>
-          <div className="nav-links">
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
-          </div>
-        </nav>
+        <Navigation />
 
         <main className="main-content">
           <Routes>

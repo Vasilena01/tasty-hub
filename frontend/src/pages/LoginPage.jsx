@@ -13,10 +13,8 @@ const LoginPage = () => {
 
   const { isAuthenticated, loading, error } = useSelector((state) => state.auth);
 
-  // Get intended destination from location state (D-18)
   const from = location.state?.from?.pathname || '/dashboard';
 
-  // Redirect if already authenticated (D-16, D-37)
   useEffect(() => {
     if (isAuthenticated) {
       navigate(from, { replace: true });
@@ -33,7 +31,6 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // D-14: Validation on submit only - basic check
     if (!email || !password) {
       return;
     }
@@ -46,7 +43,6 @@ const LoginPage = () => {
       <div className="auth-container">
         <h1>Login</h1>
 
-        {/* D-15: Display errors at top of form */}
         {error && (
           <div className="error-message">
             {error}
