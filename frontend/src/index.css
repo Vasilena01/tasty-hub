@@ -1,11 +1,11 @@
 :root {
-  /* Color Palette - Fresh mint and coral tones */
-  --color-primary: #93e1d8;
-  --color-primary-dark: #7bc9c0;
-  --color-secondary: #aa4465;
-  --color-accent: #ffa69e;
-  --color-dark: #861657;
-  --color-light: #ddfff7;
+  /* Color Palette - Warm coral and cream tones */
+  --color-primary: #f68e5f;
+  --color-primary-dark: #e57a4d;
+  --color-secondary: #f76c5e;
+  --color-accent: #f5dd90;
+  --color-dark: #5a3e36;
+  --color-light: #fff8f0;
   --color-white: #FFFFFF;
   --color-gray-700: #636E72;
   --color-gray-400: #B2BEC3;
