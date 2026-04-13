@@ -4,7 +4,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 3rem;
-  background: linear-gradient(135deg, var(--color-dark) 0%, #3d4447 100%);
+  background: linear-gradient(135deg, #861657 0%, #a01a6d 100%);
   color: var(--color-white);
   border-bottom: 3px solid var(--color-primary);
   box-shadow: var(--shadow-md);
@@ -188,7 +188,7 @@
   align-items: center;
   min-height: calc(100vh - 120px);
   padding: 2rem;
-  background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 209, 102, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(147, 225, 216, 0.1) 0%, rgba(255, 166, 158, 0.1) 100%);
 }
 
 .auth-container {
@@ -232,7 +232,7 @@
 .form-group input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+  box-shadow: 0 0 0 3px rgba(147, 225, 216, 0.1);
 }
 
 .form-row {
@@ -312,7 +312,7 @@
   display: flex;
   justify-content: center;
   padding: 2rem;
-  background: linear-gradient(135deg, rgba(255, 107, 53, 0.05) 0%, rgba(255, 209, 102, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(147, 225, 216, 0.05) 0%, rgba(255, 166, 158, 0.05) 100%);
   min-height: calc(100vh - 120px);
 }
 
@@ -333,7 +333,7 @@
 }
 
 .dashboard-info {
-  background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(140, 179, 105, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(147, 225, 216, 0.1) 0%, rgba(170, 68, 101, 0.1) 100%);
   padding: 1.5rem;
   border-radius: var(--radius-md);
   margin: 1.5rem 0;
