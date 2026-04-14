@@ -19,9 +19,11 @@ app.use('/uploads', express.static('uploads'));
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
+const recipeRoutes = require('./routes/recipeRoutes');
 
 // Mount routes
 app.use('/api/auth', authRoutes);
+app.use('/api/recipes', recipeRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
