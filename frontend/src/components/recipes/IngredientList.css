@@ -1,0 +1,125 @@
+.ingredient-list {
+  margin-bottom: 24px;
+}
+
+.ingredient-list-label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 500;
+  color: #333;
+}
+
+.ingredient-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.ingredient-inputs {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+}
+
+.ingredient-field {
+  flex: 1;
+}
+
+.ingredient-name {
+  flex: 2;
+}
+
+.ingredient-quantity,
+.ingredient-unit {
+  flex: 1;
+}
+
+.ingredient-field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.ingredient-field input:focus {
+  outline: none;
+  border-color: var(--primary-color, #e07b39);
+}
+
+.ingredient-field input.input-error {
+  border-color: #e74c3c;
+}
+
+.field-error {
+  display: block;
+  font-size: 0.75rem;
+  color: #e74c3c;
+  margin-top: 4px;
+}
+
+.list-error {
+  display: block;
+  font-size: 0.875rem;
+  color: #e74c3c;
+  margin-bottom: 12px;
+}
+
+.remove-ingredient-btn {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: none;
+  background: #f8d7da;
+  color: #721c24;
+  border-radius: 8px;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.remove-ingredient-btn:hover {
+  background: #f5c6cb;
+}
+
+.add-ingredient-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 2px dashed var(--primary-color, #e07b39);
+  background: transparent;
+  color: var(--primary-color, #e07b39);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-ingredient-btn:hover {
+  background: rgba(224, 123, 57, 0.1);
+}
+
+@media (max-width: 600px) {
+  .ingredient-inputs {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ingredient-row {
+    flex-direction: column;
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 8px;
+  }
+
+  .remove-ingredient-btn {
+    align-self: flex-end;
+    margin-top: 8px;
+  }
+}
