@@ -177,9 +177,7 @@ const getAllRecipes = async (req, res) => {
     const recipes = await Recipe.findAll(filters);
 
     // Count total for pagination
-    // For now, return recipes length as total (simplified)
-    // In production, we'd need a separate count query
-    const total = recipes.length;
+    const total = await Recipe.countAll({ category, difficulty, minRating: minRating ? parseFloat(minRating) : null, search });
 
     res.json({
       success: true,
