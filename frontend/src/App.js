@@ -4,6 +4,11 @@ import { logout } from './redux/slices/authSlice';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import BrowseRecipesPage from './pages/BrowseRecipesPage';
+import RecipeDetailPage from './pages/RecipeDetailPage';
+import CreateRecipePage from './pages/CreateRecipePage';
+import EditRecipePage from './pages/EditRecipePage';
+import MyRecipesPage from './pages/MyRecipesPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -21,8 +26,11 @@ function Navigation() {
     <nav className="main-nav">
       <Link to="/" className="nav-logo">Recipe Hub</Link>
       <div className="nav-links">
+        <Link to="/recipes">Browse Recipes</Link>
         {isAuthenticated ? (
           <>
+            <Link to="/my-recipes">My Recipes</Link>
+            <Link to="/create-recipe" className="create-nav-btn">+ Create</Link>
             <Link to="/dashboard">Dashboard</Link>
             <span className="user-name">{user?.username}</span>
             <button onClick={handleLogout} className="logout-btn">Logout</button>
@@ -47,6 +55,8 @@ function App() {
         <main className="main-content">
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/recipes" element={<BrowseRecipesPage />} />
+            <Route path="/recipes/:id" element={<RecipeDetailPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route
@@ -72,8 +82,8 @@ function HomePage() {
         <h1>Welcome to Recipe Hub</h1>
         <p className="hero-tagline">Discover, share, and savor delicious recipes from around the world</p>
         <div className="home-actions">
-          <Link to="/register" className="home-button primary">Get Started</Link>
-          <Link to="/login" className="home-button secondary">Login</Link>
+          <Link to="/recipes" className="home-button primary">Browse Recipes</Link>
+          <Link to="/register" className="home-button secondary">Get Started</Link>
         </div>
       </div>
     </div>
