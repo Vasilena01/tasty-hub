@@ -104,6 +104,44 @@ class Recipe {
     return result.rows;
   }
 
+  // Count all recipes with filters (for pagination)
+  static async countAll({ category, difficulty, minRating, search }) {
+    let query = `
+      SELECT COUNT(*) as total
+      FROM recipes r
+      WHERE 1=1
+    `;
+    const values = [];
+    let paramCount = 0;
+
+    if (category) {
+      paramCount++;
+      query += ` AND r.category = $${paramCount}`;
+      values.push(category);
+    }
+
+    if (difficulty) {
+      paramCount++;
+      query += ` AND r.difficulty = $${paramCount}`;
+      values.push(difficulty);
+    }
+
+    if (minRating) {
+      paramCount++;
+      query += ` AND r.average_rating >= $${paramCount}`;
+      values.push(minRating);
+    }
+
+    if (search) {
+      paramCount++;
+      query += ` AND (r.title ILIKE $${paramCount} OR r.description ILIKE $${paramCount})`;
+      values.push(`%${search}%`);
+    }
+
+    const result = await db.query(query, values);
+    return parseInt(result.rows[0].total);
+  }
+
   // Find recipes by user
   static async findByUserId(userId) {
     const query = `
