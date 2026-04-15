@@ -63,6 +63,17 @@
   font-weight: 500;
 }
 
+.create-nav-btn {
+  background: var(--primary-color, #e07b39) !important;
+  color: white !important;
+  padding: 8px 16px !important;
+  border-radius: 20px;
+}
+
+.create-nav-btn:hover {
+  background: var(--primary-hover, #c86a2e) !important;
+}
+
 /* Main content */
 .main-content {
   min-height: calc(100vh - 60px);
