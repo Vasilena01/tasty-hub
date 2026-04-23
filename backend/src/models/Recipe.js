@@ -39,7 +39,17 @@ class Recipe {
       WHERE r.id = $1
     `;
     const result = await db.query(query, [id]);
-    return result.rows[0];
+    const row = result.rows[0];
+    if (!row) return null;
+    // Convert numeric strings to numbers for JavaScript
+    return {
+      ...row,
+      average_rating: row.average_rating ? parseFloat(row.average_rating) : 0,
+      cooking_time: parseInt(row.cooking_time),
+      servings: parseInt(row.servings),
+      total_ratings: parseInt(row.total_ratings),
+      total_saves: parseInt(row.total_saves)
+    };
   }
 
   // Find all recipes with filters
@@ -101,7 +111,15 @@ class Recipe {
     }
 
     const result = await db.query(query, values);
-    return result.rows;
+    // Convert numeric strings to numbers for JavaScript
+    return result.rows.map(row => ({
+      ...row,
+      average_rating: row.average_rating ? parseFloat(row.average_rating) : 0,
+      cooking_time: parseInt(row.cooking_time),
+      servings: parseInt(row.servings),
+      total_ratings: parseInt(row.total_ratings),
+      total_saves: parseInt(row.total_saves)
+    }));
   }
 
   // Count all recipes with filters (for pagination)
@@ -150,7 +168,15 @@ class Recipe {
       ORDER BY created_at DESC
     `;
     const result = await db.query(query, [userId]);
-    return result.rows;
+    // Convert numeric strings to numbers for JavaScript
+    return result.rows.map(row => ({
+      ...row,
+      average_rating: row.average_rating ? parseFloat(row.average_rating) : 0,
+      cooking_time: parseInt(row.cooking_time),
+      servings: parseInt(row.servings),
+      total_ratings: parseInt(row.total_ratings),
+      total_saves: parseInt(row.total_saves)
+    }));
   }
 
   // Update recipe
@@ -219,6 +245,173 @@ class Recipe {
     `;
     const result = await db.query(query, [recipeId]);
     return result.rows[0];
+  }
+
+  // Find recipes by ingredients with fuzzy matching
+  static async findByIngredients({ ingredients, category, difficulty, minRating, limit, offset }) {
+    // Parse comma-separated ingredients and trim whitespace
+    const ingredientList = ingredients
+      .split(',')
+      .map(ing => ing.trim().toLowerCase())
+      .filter(ing => ing.length > 0);
+
+    if (ingredientList.length === 0) {
+      return [];
+    }
+
+    // Build fuzzy matching conditions for each ingredient
+    const ingredientConditions = ingredientList.map((_, index) =>
+      `i.name ILIKE $${index + 1}`
+    ).join(' OR ');
+
+    let query = `
+      WITH matched_recipes AS (
+        SELECT
+          r.id,
+          COUNT(DISTINCT ri.ingredient_id) as match_count,
+          ARRAY_AGG(DISTINCT i.name) as matched_ingredient_names,
+          ARRAY_AGG(DISTINCT ri.ingredient_id) as matched_ingredient_ids
+        FROM recipes r
+        JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+        JOIN ingredients i ON ri.ingredient_id = i.id
+        WHERE ${ingredientConditions}
+        GROUP BY r.id
+      ),
+      all_ingredients AS (
+        SELECT
+          ri.recipe_id,
+          JSON_AGG(JSON_BUILD_OBJECT(
+            'id', i.id,
+            'name', i.name,
+            'quantity', ri.quantity,
+            'unit', ri.unit
+          )) as ingredients
+        FROM recipe_ingredients ri
+        JOIN ingredients i ON ri.ingredient_id = i.id
+        GROUP BY ri.recipe_id
+      )
+      SELECT
+        r.*,
+        u.username,
+        u.first_name,
+        u.last_name,
+        mr.match_count,
+        mr.matched_ingredient_names,
+        mr.matched_ingredient_ids,
+        ai.ingredients
+      FROM matched_recipes mr
+      JOIN recipes r ON mr.id = r.id
+      JOIN users u ON r.user_id = u.id
+      LEFT JOIN all_ingredients ai ON r.id = ai.recipe_id
+      WHERE 1=1
+    `;
+
+    const values = ingredientList.map(ing => `%${ing}%`);
+    let paramCount = ingredientList.length;
+
+    // Apply filters
+    if (category) {
+      paramCount++;
+      query += ` AND r.category = $${paramCount}`;
+      values.push(category);
+    }
+
+    if (difficulty) {
+      paramCount++;
+      query += ` AND r.difficulty = $${paramCount}`;
+      values.push(difficulty);
+    }
+
+    if (minRating) {
+      paramCount++;
+      query += ` AND r.average_rating >= $${paramCount}`;
+      values.push(minRating);
+    }
+
+    // Sort by match count (descending), then by rating (descending)
+    query += ' ORDER BY mr.match_count DESC, r.average_rating DESC, r.created_at DESC';
+
+    if (limit) {
+      paramCount++;
+      query += ` LIMIT $${paramCount}`;
+      values.push(limit);
+    }
+
+    if (offset) {
+      paramCount++;
+      query += ` OFFSET $${paramCount}`;
+      values.push(offset);
+    }
+
+    const result = await db.query(query, values);
+
+    // Convert numeric strings to numbers and structure matched ingredients
+    return result.rows.map(row => ({
+      ...row,
+      average_rating: row.average_rating ? parseFloat(row.average_rating) : 0,
+      cooking_time: parseInt(row.cooking_time),
+      servings: parseInt(row.servings),
+      total_ratings: parseInt(row.total_ratings),
+      total_saves: parseInt(row.total_saves),
+      match_count: parseInt(row.match_count),
+      matched_ingredients: row.matched_ingredient_names || [],
+      matched_ingredient_ids: row.matched_ingredient_ids || [],
+      ingredients: row.ingredients || []
+    }));
+  }
+
+  // Count recipes matching ingredients (for pagination)
+  static async countByIngredients({ ingredients, category, difficulty, minRating }) {
+    const ingredientList = ingredients
+      .split(',')
+      .map(ing => ing.trim().toLowerCase())
+      .filter(ing => ing.length > 0);
+
+    if (ingredientList.length === 0) {
+      return 0;
+    }
+
+    const ingredientConditions = ingredientList.map((_, index) =>
+      `i.name ILIKE $${index + 1}`
+    ).join(' OR ');
+
+    let query = `
+      WITH matched_recipes AS (
+        SELECT DISTINCT r.id
+        FROM recipes r
+        JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+        JOIN ingredients i ON ri.ingredient_id = i.id
+        WHERE ${ingredientConditions}
+      )
+      SELECT COUNT(*) as total
+      FROM matched_recipes mr
+      JOIN recipes r ON mr.id = r.id
+      WHERE 1=1
+    `;
+
+    const values = ingredientList.map(ing => `%${ing}%`);
+    let paramCount = ingredientList.length;
+
+    if (category) {
+      paramCount++;
+      query += ` AND r.category = $${paramCount}`;
+      values.push(category);
+    }
+
+    if (difficulty) {
+      paramCount++;
+      query += ` AND r.difficulty = $${paramCount}`;
+      values.push(difficulty);
+    }
+
+    if (minRating) {
+      paramCount++;
+      query += ` AND r.average_rating >= $${paramCount}`;
+      values.push(minRating);
+    }
+
+    const result = await db.query(query, values);
+    return parseInt(result.rows[0].total);
   }
 }
 

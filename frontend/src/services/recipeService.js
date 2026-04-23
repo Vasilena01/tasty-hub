@@ -49,6 +49,20 @@ const recipeService = {
   getMyRecipes: async () => {
     const response = await axiosInstance.get('/recipes/user/me');
     return response.data;
+  },
+
+  // Search recipes by ingredients
+  searchByIngredients: async (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.ingredients) params.append('ingredients', filters.ingredients);
+    if (filters.category) params.append('category', filters.category);
+    if (filters.difficulty) params.append('difficulty', filters.difficulty);
+    if (filters.minRating) params.append('minRating', filters.minRating);
+    if (filters.page) params.append('page', filters.page);
+    if (filters.limit) params.append('limit', filters.limit);
+
+    const response = await axiosInstance.get(`/recipes/search/by-ingredients?${params.toString()}`);
+    return response.data;
   }
 };
 

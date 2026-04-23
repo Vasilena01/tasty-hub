@@ -2,6 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchRecipes,
+  searchRecipesByIngredients,
   setFilters,
   selectAllRecipes,
   selectRecipeLoading,
@@ -22,11 +23,24 @@ function BrowseRecipesPage() {
 
   // Fetch recipes when filters or page changes
   useEffect(() => {
-    dispatch(fetchRecipes({
-      ...filters,
-      page: pagination.page,
-      limit: pagination.limit
-    }));
+    // If ingredient search is active, use ingredient search endpoint
+    if (filters.ingredientSearch && filters.ingredientSearch.trim()) {
+      dispatch(searchRecipesByIngredients({
+        ingredients: filters.ingredientSearch,
+        category: filters.category,
+        difficulty: filters.difficulty,
+        minRating: filters.minRating,
+        page: pagination.page,
+        limit: pagination.limit
+      }));
+    } else {
+      // Otherwise use regular search
+      dispatch(fetchRecipes({
+        ...filters,
+        page: pagination.page,
+        limit: pagination.limit
+      }));
+    }
   }, [dispatch, filters, pagination.page, pagination.limit]);
 
   // Handle filter changes - reset to page 1
@@ -35,18 +49,35 @@ function BrowseRecipesPage() {
     // Pagination will reset when filters change via fetchRecipes
   }, [dispatch]);
 
-  // Handle search
+  // Handle recipe name search
   const handleSearch = useCallback((searchText) => {
     dispatch(setFilters({ search: searchText }));
   }, [dispatch]);
 
+  // Handle ingredient search
+  const handleIngredientSearch = useCallback((ingredientText) => {
+    dispatch(setFilters({ ingredientSearch: ingredientText }));
+  }, [dispatch]);
+
   // Handle page change
   const handlePageChange = useCallback((newPage) => {
-    dispatch(fetchRecipes({
-      ...filters,
-      page: newPage,
-      limit: pagination.limit
-    }));
+    // If ingredient search is active, use ingredient search endpoint
+    if (filters.ingredientSearch && filters.ingredientSearch.trim()) {
+      dispatch(searchRecipesByIngredients({
+        ingredients: filters.ingredientSearch,
+        category: filters.category,
+        difficulty: filters.difficulty,
+        minRating: filters.minRating,
+        page: newPage,
+        limit: pagination.limit
+      }));
+    } else {
+      dispatch(fetchRecipes({
+        ...filters,
+        page: newPage,
+        limit: pagination.limit
+      }));
+    }
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [dispatch, filters, pagination.limit]);
@@ -62,6 +93,10 @@ function BrowseRecipesPage() {
         <SearchBar
           onSearch={handleSearch}
           placeholder="Search by title or description..."
+        />
+        <SearchBar
+          onSearch={handleIngredientSearch}
+          placeholder="Search by ingredients (e.g., chicken, rice, tomatoes)..."
         />
       </div>
 
@@ -93,10 +128,11 @@ function BrowseRecipesPage() {
             recipes={recipes}
             loading={loading}
             emptyMessage={
-              filters.search || filters.category || filters.difficulty || filters.minRating
+              filters.search || filters.ingredientSearch || filters.category || filters.difficulty || filters.minRating
                 ? "No recipes match your filters. Try adjusting your search criteria."
                 : "No recipes available yet. Be the first to share a recipe!"
             }
+            showIngredients={filters.ingredientSearch && filters.ingredientSearch.trim()}
           />
 
           <Pagination

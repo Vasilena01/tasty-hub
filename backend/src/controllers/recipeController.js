@@ -382,11 +382,73 @@ const deleteRecipe = async (req, res) => {
   }
 };
 
+// Search recipes by ingredients
+const searchByIngredients = async (req, res) => {
+  try {
+    const {
+      ingredients,
+      category,
+      difficulty,
+      minRating,
+      page = 1,
+      limit = 12
+    } = req.query;
+
+    // Validate ingredients parameter
+    if (!ingredients || !ingredients.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Ingredients parameter is required'
+      });
+    }
+
+    const offset = (page - 1) * limit;
+
+    // Build filter parameters
+    const filters = {
+      ingredients,
+      category,
+      difficulty,
+      minRating: minRating ? parseFloat(minRating) : null,
+      limit: parseInt(limit),
+      offset
+    };
+
+    const recipes = await Recipe.findByIngredients(filters);
+
+    // Count total for pagination
+    const total = await Recipe.countByIngredients({
+      ingredients,
+      category,
+      difficulty,
+      minRating: minRating ? parseFloat(minRating) : null
+    });
+
+    res.json({
+      success: true,
+      recipes,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Search by ingredients error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error searching recipes by ingredients'
+    });
+  }
+};
+
 module.exports = {
   createRecipe,
   getRecipeById,
   getAllRecipes,
   getMyRecipes,
   updateRecipe,
-  deleteRecipe
+  deleteRecipe,
+  searchByIngredients
 };

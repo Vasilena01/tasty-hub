@@ -74,6 +74,18 @@ export const fetchMyRecipes = createAsyncThunk(
   }
 );
 
+export const searchRecipesByIngredients = createAsyncThunk(
+  'recipes/searchByIngredients',
+  async (filters, { rejectWithValue }) => {
+    try {
+      const data = await recipeService.searchByIngredients(filters);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to search recipes by ingredients');
+    }
+  }
+);
+
 // Initial State
 const initialState = {
   // Normalized entities
@@ -92,6 +104,7 @@ const initialState = {
     difficulty: '',
     minRating: '',
     search: '',
+    ingredientSearch: '',
     sortBy: 'newest'
   },
 
@@ -123,6 +136,7 @@ const recipeSlice = createSlice({
         difficulty: '',
         minRating: '',
         search: '',
+        ingredientSearch: '',
         sortBy: 'newest'
       };
     },
@@ -239,6 +253,26 @@ const recipeSlice = createSlice({
         state.myRecipeIds = action.payload.map(r => r.id);
       })
       .addCase(fetchMyRecipes.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Search by ingredients
+      .addCase(searchRecipesByIngredients.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(searchRecipesByIngredients.fulfilled, (state, action) => {
+        state.loading = false;
+        // Normalize recipes into entities
+        action.payload.recipes.forEach(recipe => {
+          state.entities[recipe.id] = recipe;
+        });
+        // Store IDs in browse list
+        state.browseList = action.payload.recipes.map(r => r.id);
+        state.browsePagination = action.payload.pagination;
+      })
+      .addCase(searchRecipesByIngredients.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

@@ -6,6 +6,7 @@ const upload = require('../middleware/uploadMiddleware');
 
 // Public routes (no auth required)
 router.get('/', recipeController.getAllRecipes);
+router.get('/search/by-ingredients', recipeController.searchByIngredients);
 
 // Protected routes (auth required)
 // Note: /user/me must come BEFORE /:id to prevent 'me' being parsed as an ID

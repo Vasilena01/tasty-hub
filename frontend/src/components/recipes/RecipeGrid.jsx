@@ -1,7 +1,7 @@
 import RecipeCard from './RecipeCard';
 import './RecipeGrid.css';
 
-function RecipeGrid({ recipes, loading, emptyMessage = 'No recipes found' }) {
+function RecipeGrid({ recipes, loading, emptyMessage = 'No recipes found', showIngredients = false }) {
   if (loading) {
     return (
       <div className="recipe-grid-loading">
@@ -22,7 +22,7 @@ function RecipeGrid({ recipes, loading, emptyMessage = 'No recipes found' }) {
   return (
     <div className="recipe-grid">
       {recipes.map(recipe => (
-        <RecipeCard key={recipe.id} recipe={recipe} />
+        <RecipeCard key={recipe.id} recipe={recipe} showIngredients={showIngredients} />
       ))}
     </div>
   );

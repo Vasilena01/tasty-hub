@@ -113,7 +113,7 @@ function MyRecipesPage() {
                 <div className="recipe-info">
                   <h3>{recipe.title}</h3>
                   <div className="recipe-stats">
-                    <span>⭐ {recipe.average_rating?.toFixed(1) || '0.0'}</span>
+                    <span>⭐ {recipe.average_rating.toFixed(1)}</span>
                     <span>❤️ {recipe.total_saves || 0} saves</span>
                   </div>
                 </div>
