@@ -76,6 +76,73 @@ class SavedRecipe {
     const result = await db.query(query, [recipeId]);
     return parseInt(result.rows[0].count);
   }
+
+  // Convenience methods to match plan naming
+
+  /**
+   * Save a recipe (alternative naming)
+   * @param {number} userId - User ID
+   * @param {number} recipeId - Recipe ID
+   * @returns {Promise<object>} Created saved recipe
+   */
+  static async saveRecipe(userId, recipeId) {
+    const result = await this.create({ user_id: userId, recipe_id: recipeId });
+    if (!result) {
+      throw new Error('Recipe already saved');
+    }
+    return result;
+  }
+
+  /**
+   * Unsave a recipe (alternative naming)
+   * @param {number} userId - User ID
+   * @param {number} recipeId - Recipe ID
+   * @returns {Promise<boolean>} Success status
+   */
+  static async unsaveRecipe(userId, recipeId) {
+    const result = await this.delete(userId, recipeId);
+    return !!result;
+  }
+
+  /**
+   * Get user's saved recipes (alternative naming with enhanced query)
+   * @param {number} userId - User ID
+   * @param {object} options - Query options
+   * @returns {Promise<array>} Array of saved recipes
+   */
+  static async getUserSavedRecipes(userId, options = {}) {
+    return await this.findByUserId(userId, options);
+  }
+
+  /**
+   * Check if saved (alternative naming)
+   * @param {number} userId - User ID
+   * @param {number} recipeId - Recipe ID
+   * @returns {Promise<boolean>} True if saved
+   */
+  static async isSaved(userId, recipeId) {
+    return await this.exists(userId, recipeId);
+  }
+
+  /**
+   * Get user's saved recipe count
+   * @param {number} userId - User ID
+   * @returns {Promise<number>} Count
+   */
+  static async getUserSavedCount(userId) {
+    const query = 'SELECT COUNT(*) as count FROM saved_recipes WHERE user_id = $1';
+    const result = await db.query(query, [userId]);
+    return parseInt(result.rows[0].count);
+  }
+
+  /**
+   * Get recipe's save count (alternative naming)
+   * @param {number} recipeId - Recipe ID
+   * @returns {Promise<number>} Count
+   */
+  static async getRecipeSaveCount(recipeId) {
+    return await this.countByRecipeId(recipeId);
+  }
 }
 
 module.exports = SavedRecipe;
