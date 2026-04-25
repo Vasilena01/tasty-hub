@@ -14,9 +14,9 @@ export const fetchSavedRecipes = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await savedRecipesService.fetchSavedRecipes();
-      return response.savedRecipes;
+      return response.data.recipes; // Backend returns data.recipes
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to fetch saved recipes');
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch saved recipes');
     }
   }
 );
@@ -27,9 +27,9 @@ export const saveRecipe = createAsyncThunk(
   async (recipeId, { rejectWithValue }) => {
     try {
       const response = await savedRecipesService.saveRecipe(recipeId);
-      return response.savedRecipe;
+      return response.data; // Backend returns data (the saved recipe object)
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to save recipe');
+      return rejectWithValue(error.response?.data?.message || 'Failed to save recipe');
     }
   }
 );
@@ -42,7 +42,7 @@ export const unsaveRecipe = createAsyncThunk(
       await savedRecipesService.unsaveRecipe(recipeId);
       return recipeId;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to unsave recipe');
+      return rejectWithValue(error.response?.data?.message || 'Failed to unsave recipe');
     }
   }
 );
@@ -53,9 +53,9 @@ export const checkIfSaved = createAsyncThunk(
   async (recipeId, { rejectWithValue }) => {
     try {
       const response = await savedRecipesService.checkIfSaved(recipeId);
-      return { recipeId, isSaved: response.isSaved };
+      return { recipeId, isSaved: response.data.isSaved }; // Backend returns data.isSaved
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to check saved status');
+      return rejectWithValue(error.response?.data?.message || 'Failed to check saved status');
     }
   }
 );

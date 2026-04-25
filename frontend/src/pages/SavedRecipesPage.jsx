@@ -41,11 +41,11 @@ const SavedRecipesPage = () => {
       <div className="saved-recipes-header">
         <h1>My Saved Recipes</h1>
         <p className="saved-count">
-          {savedRecipes.length} {savedRecipes.length === 1 ? 'recipe' : 'recipes'} saved
+          {savedRecipes?.length || 0} {savedRecipes?.length === 1 ? 'recipe' : 'recipes'} saved
         </p>
       </div>
 
-      {savedRecipes.length === 0 ? (
+      {!savedRecipes || savedRecipes.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">🔖</div>
           <h2>No saved recipes yet</h2>
