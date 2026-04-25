@@ -12,7 +12,7 @@ function RecipeCard({ recipe, showIngredients = false, showSaveButton = false })
   const { isAuthenticated } = useSelector((state) => state.auth);
   const { savedRecipeIds } = useSelector((state) => state.savedRecipes);
 
-  const isSaved = savedRecipeIds.has(recipe.id);
+  const isSaved = savedRecipeIds.includes(recipe.id);
 
   // Build full image URL
   const imageUrl = recipe.image_url

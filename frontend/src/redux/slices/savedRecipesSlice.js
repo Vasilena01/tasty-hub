@@ -3,7 +3,7 @@ import savedRecipesService from '../../services/savedRecipesService';
 
 const initialState = {
   savedRecipes: [],
-  savedRecipeIds: new Set(),
+  savedRecipeIds: [],
   loading: false,
   error: null
 };
@@ -69,7 +69,7 @@ const savedRecipesSlice = createSlice({
     },
     resetSavedRecipes: (state) => {
       state.savedRecipes = [];
-      state.savedRecipeIds = new Set();
+      state.savedRecipeIds = [];
       state.error = null;
     }
   },
@@ -83,7 +83,7 @@ const savedRecipesSlice = createSlice({
       .addCase(fetchSavedRecipes.fulfilled, (state, action) => {
         state.loading = false;
         state.savedRecipes = action.payload;
-        state.savedRecipeIds = new Set(action.payload.map(sr => sr.recipe_id));
+        state.savedRecipeIds = action.payload.map(sr => sr.recipe_id);
       })
       .addCase(fetchSavedRecipes.rejected, (state, action) => {
         state.loading = false;
@@ -95,7 +95,9 @@ const savedRecipesSlice = createSlice({
       })
       .addCase(saveRecipe.fulfilled, (state, action) => {
         state.savedRecipes.push(action.payload);
-        state.savedRecipeIds.add(action.payload.recipe_id);
+        if (!state.savedRecipeIds.includes(action.payload.recipe_id)) {
+          state.savedRecipeIds.push(action.payload.recipe_id);
+        }
       })
       .addCase(saveRecipe.rejected, (state, action) => {
         state.error = action.payload;
@@ -107,7 +109,7 @@ const savedRecipesSlice = createSlice({
       .addCase(unsaveRecipe.fulfilled, (state, action) => {
         const recipeId = action.payload;
         state.savedRecipes = state.savedRecipes.filter(sr => sr.recipe_id !== recipeId);
-        state.savedRecipeIds.delete(recipeId);
+        state.savedRecipeIds = state.savedRecipeIds.filter(id => id !== recipeId);
       })
       .addCase(unsaveRecipe.rejected, (state, action) => {
         state.error = action.payload;
@@ -116,9 +118,11 @@ const savedRecipesSlice = createSlice({
       .addCase(checkIfSaved.fulfilled, (state, action) => {
         const { recipeId, isSaved } = action.payload;
         if (isSaved) {
-          state.savedRecipeIds.add(recipeId);
+          if (!state.savedRecipeIds.includes(recipeId)) {
+            state.savedRecipeIds.push(recipeId);
+          }
         } else {
-          state.savedRecipeIds.delete(recipeId);
+          state.savedRecipeIds = state.savedRecipeIds.filter(id => id !== recipeId);
         }
       });
   }
