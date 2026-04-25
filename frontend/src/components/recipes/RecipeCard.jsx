@@ -20,7 +20,7 @@ function RecipeCard({ recipe, showIngredients = false, showSaveButton = false })
     : '/placeholder-recipe.jpg';
 
   // Format rating display
-  const rating = recipe.average_rating ? recipe.average_rating.toFixed(1) : '0.0';
+  const rating = recipe.average_rating ? parseFloat(recipe.average_rating).toFixed(1) : '0.0';
 
   // Check if an ingredient is matched
   const isMatched = (ingredientName) => {
