@@ -133,6 +133,7 @@ function BrowseRecipesPage() {
                 : "No recipes available yet. Be the first to share a recipe!"
             }
             showIngredients={filters.ingredientSearch && filters.ingredientSearch.trim()}
+            showSaveButton={true}
           />
 
           <Pagination

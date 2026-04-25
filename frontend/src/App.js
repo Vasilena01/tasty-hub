@@ -9,6 +9,7 @@ import RecipeDetailPage from './pages/RecipeDetailPage';
 import CreateRecipePage from './pages/CreateRecipePage';
 import EditRecipePage from './pages/EditRecipePage';
 import MyRecipesPage from './pages/MyRecipesPage';
+import SavedRecipesPage from './pages/SavedRecipesPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -30,6 +31,7 @@ function Navigation() {
         {isAuthenticated ? (
           <>
             <Link to="/my-recipes">My Recipes</Link>
+            <Link to="/saved-recipes">Saved Recipes</Link>
             <Link to="/create-recipe" className="create-nav-btn">+ Create</Link>
             <Link to="/dashboard">Dashboard</Link>
             <span className="user-name">{user?.username}</span>
@@ -88,6 +90,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <MyRecipesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/saved-recipes"
+              element={
+                <ProtectedRoute>
+                  <SavedRecipesPage />
                 </ProtectedRoute>
               }
             />
