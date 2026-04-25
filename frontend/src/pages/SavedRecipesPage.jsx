@@ -59,7 +59,7 @@ const SavedRecipesPage = () => {
           {savedRecipes.map((savedRecipe) => (
             <RecipeCard
               key={savedRecipe.recipe_id}
-              recipe={savedRecipe.Recipe}
+              recipe={savedRecipe}
               showSaveButton={true}
             />
           ))}
