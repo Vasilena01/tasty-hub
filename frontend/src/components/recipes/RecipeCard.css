@@ -171,3 +171,43 @@
   flex: 1;
   text-align: right;
 }
+
+/* Save button */
+.save-button {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #e0e0e0;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.save-button:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.save-button.saved {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: #ff6b6b;
+}
+
+.save-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+

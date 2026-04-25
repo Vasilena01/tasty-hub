@@ -1,9 +1,18 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { saveRecipe, unsaveRecipe } from '../../redux/slices/savedRecipesSlice';
 import './RecipeCard.css';
 
-function RecipeCard({ recipe, showIngredients = false }) {
+function RecipeCard({ recipe, showIngredients = false, showSaveButton = false }) {
   const [showOverlay, setShowOverlay] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { savedRecipeIds } = useSelector((state) => state.savedRecipes);
+
+  const isSaved = savedRecipeIds.has(recipe.id);
 
   // Build full image URL
   const imageUrl = recipe.image_url
@@ -22,6 +31,29 @@ function RecipeCard({ recipe, showIngredients = false }) {
       matched.toLowerCase().includes(ingredientName.toLowerCase()) ||
       ingredientName.toLowerCase().includes(matched.toLowerCase())
     );
+  };
+
+  // Handle save/unsave toggle
+  const handleSaveToggle = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      if (isSaved) {
+        await dispatch(unsaveRecipe(recipe.id)).unwrap();
+      } else {
+        await dispatch(saveRecipe(recipe.id)).unwrap();
+      }
+    } catch (error) {
+      console.error('Error toggling save:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -69,6 +101,18 @@ function RecipeCard({ recipe, showIngredients = false }) {
           </div>
         </div>
       </Link>
+
+      {/* Save button - shown when enabled and user is authenticated */}
+      {showSaveButton && isAuthenticated && (
+        <button
+          className={`save-button ${isSaved ? 'saved' : ''}`}
+          onClick={handleSaveToggle}
+          disabled={isSaving}
+          title={isSaved ? 'Unsave recipe' : 'Save recipe'}
+        >
+          <span className="save-icon">{isSaved ? '❤️' : '🤍'}</span>
+        </button>
+      )}
 
       {/* Ingredient overlay - shown on hover when ingredient search is active */}
       {showIngredients && showOverlay && recipe.ingredients && recipe.ingredients.length > 0 && (
