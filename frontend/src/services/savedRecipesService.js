@@ -8,7 +8,7 @@ const fetchSavedRecipes = async () => {
 
 // Save a recipe
 const saveRecipe = async (recipeId) => {
-  const response = await axiosInstance.post('/saved-recipes', { recipe_id: recipeId });
+  const response = await axiosInstance.post(`/saved-recipes/${recipeId}`);
   return response.data;
 };
 
