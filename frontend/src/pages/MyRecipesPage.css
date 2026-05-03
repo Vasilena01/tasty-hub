@@ -222,20 +222,37 @@
 }
 
 .cancel-btn {
-  padding: 10px 24px;
-  border: 1px solid #ddd;
+  padding: 12px 32px;
+  border: 2px solid #ddd;
   background: white;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  min-width: 100px;
+}
+
+.cancel-btn:hover {
+  background: #f8f9fa;
+  border-color: #bdc3c7;
 }
 
 .confirm-delete-btn {
-  padding: 10px 24px;
+  padding: 12px 32px;
   border: none;
   background: #e74c3c;
   color: white;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background 0.2s;
+  min-width: 100px;
+}
+
+.confirm-delete-btn:hover {
+  background: #c0392b;
 }
 
 @media (max-width: 600px) {
