@@ -12,6 +12,7 @@ import MyRecipesPage from './pages/MyRecipesPage';
 import SavedRecipesPage from './pages/SavedRecipesPage';
 import MealPlannerPage from './pages/MealPlannerPage';
 import ShoppingListPage from './pages/ShoppingListPage';
+import UserProfilePage from './pages/UserProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -120,6 +121,10 @@ function App() {
                   <ShoppingListPage />
                 </ProtectedRoute>
               }
+            />
+            <Route
+              path="/user/:userId"
+              element={<UserProfilePage />}
             />
           </Routes>
         </main>
