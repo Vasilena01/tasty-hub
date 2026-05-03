@@ -13,6 +13,7 @@ import SavedRecipesPage from './pages/SavedRecipesPage';
 import MealPlannerPage from './pages/MealPlannerPage';
 import ShoppingListPage from './pages/ShoppingListPage';
 import UserProfilePage from './pages/UserProfilePage';
+import DiscoverUsersPage from './pages/DiscoverUsersPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -31,6 +32,7 @@ function Navigation() {
       <Link to="/" className="nav-logo">Recipe Hub</Link>
       <div className="nav-links">
         <Link to="/recipes">Browse Recipes</Link>
+        <Link to="/discover">Discover Users</Link>
         {isAuthenticated ? (
           <>
             <Link to="/my-recipes">My Recipes</Link>
@@ -64,6 +66,8 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/recipes" element={<BrowseRecipesPage />} />
             <Route path="/recipes/:id" element={<RecipeDetailPage />} />
+            <Route path="/discover" element={<DiscoverUsersPage />} />
+            <Route path="/user/:userId" element={<UserProfilePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route

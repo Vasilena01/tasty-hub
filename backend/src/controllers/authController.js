@@ -188,4 +188,31 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { register, login, updateProfile };
+// Get all users for discovery
+const getAllUsers = async (req, res) => {
+  try {
+    const query = `
+      SELECT id, username, email, first_name, last_name, profile_picture_url,
+             (SELECT COUNT(*) FROM recipes WHERE user_id = users.id) as recipe_count,
+             (SELECT COUNT(*) FROM followers WHERE followed_user_id = users.id) as followers_count
+      FROM users
+      ORDER BY recipe_count DESC, followers_count DESC
+      LIMIT 50
+    `;
+    const db = require('../config/database');
+    const result = await db.query(query);
+
+    res.status(200).json({
+      success: true,
+      users: result.rows
+    });
+  } catch (error) {
+    console.error('Get all users error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error while fetching users'
+    });
+  }
+};
+
+module.exports = { register, login, updateProfile, getAllUsers };
