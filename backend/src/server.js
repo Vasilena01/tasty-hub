@@ -23,6 +23,7 @@ const recipeRoutes = require('./routes/recipeRoutes');
 const ratingRoutes = require('./routes/ratingRoutes');
 const savedRecipeRoutes = require('./routes/savedRecipeRoutes');
 const mealPlanRoutes = require('./routes/mealPlanRoutes');
+const shoppingListRoutes = require('./routes/shoppingListRoutes');
 
 // Mount routes
 app.use('/api/auth', authRoutes);
@@ -31,6 +32,7 @@ app.use('/api/ratings', ratingRoutes);
 app.use('/api', ratingRoutes); // For /api/recipes/:id/ratings
 app.use('/api/saved-recipes', savedRecipeRoutes);
 app.use('/api/meal-plans', mealPlanRoutes);
+app.use('/api/shopping-lists', shoppingListRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
