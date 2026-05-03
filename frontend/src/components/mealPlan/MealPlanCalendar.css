@@ -1,0 +1,150 @@
+.meal-plan-calendar {
+  width: 100%;
+  padding: 20px;
+}
+
+.calendar-grid {
+  border: 1px solid var(--color-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: white;
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: 120px repeat(7, 1fr);
+  background: var(--color-primary);
+  color: white;
+  padding: 10px 0;
+}
+
+.meal-type-column {
+  padding: 10px;
+}
+
+.day-header {
+  text-align: center;
+  padding: 10px;
+}
+
+.day-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.day-date {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.meal-row {
+  display: grid;
+  grid-template-columns: 120px repeat(7, 1fr);
+  border-bottom: 1px solid var(--color-light);
+}
+
+.meal-row:last-child {
+  border-bottom: none;
+}
+
+.meal-type-label {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  font-weight: 600;
+  background: var(--color-accent);
+  border-right: 1px solid var(--color-light);
+}
+
+.meal-cell {
+  padding: 10px;
+  border-right: 1px solid var(--color-light);
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meal-cell:last-child {
+  border-right: none;
+}
+
+.meal-card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.meal-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.meal-title {
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.meal-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  transition: transform var(--transition-fast);
+}
+
+.btn-icon:hover {
+  transform: scale(1.2);
+}
+
+.add-recipe-btn {
+  width: 100%;
+  height: 100%;
+  border: 2px dashed var(--color-primary);
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-normal);
+}
+
+.add-recipe-btn:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .calendar-header,
+  .meal-row {
+    grid-template-columns: 80px repeat(7, 1fr);
+  }
+
+  .meal-type-label {
+    font-size: 12px;
+  }
+
+  .meal-image {
+    width: 60px;
+    height: 60px;
+  }
+}
