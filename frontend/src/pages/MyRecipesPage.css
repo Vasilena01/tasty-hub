@@ -217,46 +217,39 @@
 
 .modal-actions {
   display: flex;
-  gap: 12px;
+  gap: 24px;
   justify-content: center;
   align-items: center;
+  margin-top: 8px;
 }
 
 .cancel-btn,
 .confirm-delete-btn {
-  padding: 12px 24px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
   cursor: pointer;
   font-size: 1rem;
   font-weight: 500;
   transition: all 0.2s;
-  width: 120px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .cancel-btn {
-  border: 2px solid #ddd;
-  background: white;
-  color: #333;
+  color: #666;
 }
 
 .cancel-btn:hover {
-  background: #f8f9fa;
-  border-color: #bdc3c7;
+  color: #333;
+  text-decoration: underline;
 }
 
 .confirm-delete-btn {
-  border: 2px solid #e74c3c;
-  background: #e74c3c;
-  color: white;
+  color: #e74c3c;
 }
 
 .confirm-delete-btn:hover {
-  background: #c0392b;
-  border-color: #c0392b;
+  color: #c0392b;
+  text-decoration: underline;
 }
 
 @media (max-width: 600px) {
