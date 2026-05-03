@@ -11,6 +11,7 @@ import EditRecipePage from './pages/EditRecipePage';
 import MyRecipesPage from './pages/MyRecipesPage';
 import SavedRecipesPage from './pages/SavedRecipesPage';
 import MealPlannerPage from './pages/MealPlannerPage';
+import ShoppingListPage from './pages/ShoppingListPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -34,6 +35,7 @@ function Navigation() {
             <Link to="/my-recipes">My Recipes</Link>
             <Link to="/saved-recipes">Saved Recipes</Link>
             <Link to="/meal-planner">Meal Planner</Link>
+            <Link to="/shopping-list">Shopping List</Link>
             <Link to="/create-recipe" className="create-nav-btn">+ Create</Link>
             <Link to="/dashboard">Dashboard</Link>
             <span className="user-name">{user?.username}</span>
@@ -108,6 +110,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <MealPlannerPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/shopping-list"
+              element={
+                <ProtectedRoute>
+                  <ShoppingListPage />
                 </ProtectedRoute>
               }
             />
