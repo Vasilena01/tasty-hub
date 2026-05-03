@@ -66,6 +66,12 @@ function MyRecipesPage() {
       : `${process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000'}${imageUrl}`;
   };
 
+  // Safely format rating - handle both number and string types
+  const formatRating = (rating) => {
+    const numRating = typeof rating === 'number' ? rating : parseFloat(rating) || 0;
+    return numRating.toFixed(1);
+  };
+
   return (
     <div className="my-recipes-page">
       <div className="page-header">
@@ -113,7 +119,7 @@ function MyRecipesPage() {
                 <div className="recipe-info">
                   <h3>{recipe.title}</h3>
                   <div className="recipe-stats">
-                    <span>⭐ {recipe.average_rating.toFixed(1)}</span>
+                    <span>⭐ {formatRating(recipe.average_rating)}</span>
                     <span>❤️ {recipe.total_saves || 0} saves</span>
                   </div>
                 </div>
