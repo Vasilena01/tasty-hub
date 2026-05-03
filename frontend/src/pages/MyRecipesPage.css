@@ -219,18 +219,28 @@
   display: flex;
   gap: 12px;
   justify-content: center;
+  align-items: center;
 }
 
-.cancel-btn {
-  padding: 12px 32px;
-  border: 2px solid #ddd;
-  background: white;
+.cancel-btn,
+.confirm-delete-btn {
+  padding: 12px 24px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
   font-weight: 500;
   transition: all 0.2s;
-  min-width: 100px;
+  width: 120px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cancel-btn {
+  border: 2px solid #ddd;
+  background: white;
+  color: #333;
 }
 
 .cancel-btn:hover {
@@ -239,20 +249,14 @@
 }
 
 .confirm-delete-btn {
-  padding: 12px 32px;
-  border: none;
+  border: 2px solid #e74c3c;
   background: #e74c3c;
   color: white;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
-  transition: background 0.2s;
-  min-width: 100px;
 }
 
 .confirm-delete-btn:hover {
   background: #c0392b;
+  border-color: #c0392b;
 }
 
 @media (max-width: 600px) {
