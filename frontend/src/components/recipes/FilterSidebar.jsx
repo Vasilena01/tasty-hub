@@ -16,7 +16,7 @@ function FilterSidebar({ onFilterChange }) {
   const handleClearFilters = () => {
     dispatch(clearFilters());
     if (onFilterChange) {
-      onFilterChange({ category: '', difficulty: '', minRating: '', search: '', sortBy: 'newest' });
+      onFilterChange({ category: '', difficulty: '', minRating: '', search: '', sortBy: 'newest', source: 'all' });
     }
   };
 
@@ -31,6 +31,19 @@ function FilterSidebar({ onFilterChange }) {
         >
           Clear All
         </button>
+      </div>
+
+      {/* Source Filter */}
+      <div className="filter-group">
+        <label htmlFor="source-filter">Recipe Source</label>
+        <select
+          id="source-filter"
+          value={filters.source || 'all'}
+          onChange={(e) => handleFilterChange('source', e.target.value)}
+        >
+          <option value="all">All Recipes</option>
+          <option value="following">Following</option>
+        </select>
       </div>
 
       {/* Category Filter */}

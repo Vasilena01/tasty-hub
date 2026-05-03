@@ -8,12 +8,15 @@ const upload = require('../middleware/uploadMiddleware');
 router.get('/', recipeController.getAllRecipes);
 router.get('/search/by-ingredients', recipeController.searchByIngredients);
 
-// Protected routes (auth required)
-// Note: /user/me must come BEFORE /:id to prevent 'me' being parsed as an ID
+// Protected routes with specific paths (must come before /:id)
+router.get('/following', verifyToken, recipeController.getFollowingRecipes);
 router.get('/user/me', verifyToken, recipeController.getMyRecipes);
 
-// More public routes (placed after specific routes to avoid conflicts)
+// Public routes with dynamic segments
+router.get('/user/:userId', recipeController.getRecipesByUserId);
 router.get('/:id', recipeController.getRecipeById);
+
+// Other protected routes
 router.post('/', verifyToken, upload.single('image'), recipeController.createRecipe);
 router.put('/:id', verifyToken, upload.single('image'), recipeController.updateRecipe);
 router.delete('/:id', verifyToken, recipeController.deleteRecipe);

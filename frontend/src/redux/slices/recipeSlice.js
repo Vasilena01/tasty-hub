@@ -86,6 +86,18 @@ export const searchRecipesByIngredients = createAsyncThunk(
   }
 );
 
+export const fetchFollowingRecipes = createAsyncThunk(
+  'recipes/fetchFollowingRecipes',
+  async (filters, { rejectWithValue }) => {
+    try {
+      const data = await recipeService.getFollowingRecipes(filters);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch following recipes');
+    }
+  }
+);
+
 // Initial State
 const initialState = {
   // Normalized entities
@@ -105,7 +117,8 @@ const initialState = {
     minRating: '',
     search: '',
     ingredientSearch: '',
-    sortBy: 'newest'
+    sortBy: 'newest',
+    source: 'all'
   },
 
   // Detail page state
@@ -137,7 +150,8 @@ const recipeSlice = createSlice({
         minRating: '',
         search: '',
         ingredientSearch: '',
-        sortBy: 'newest'
+        sortBy: 'newest',
+        source: 'all'
       };
     },
     clearError: (state) => {
@@ -273,6 +287,26 @@ const recipeSlice = createSlice({
         state.browsePagination = action.payload.pagination;
       })
       .addCase(searchRecipesByIngredients.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Fetch following recipes
+      .addCase(fetchFollowingRecipes.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchFollowingRecipes.fulfilled, (state, action) => {
+        state.loading = false;
+        // Normalize recipes into entities
+        action.payload.recipes.forEach(recipe => {
+          state.entities[recipe.id] = recipe;
+        });
+        // Store IDs in browse list
+        state.browseList = action.payload.recipes.map(r => r.id);
+        state.browsePagination = action.payload.pagination;
+      })
+      .addCase(fetchFollowingRecipes.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

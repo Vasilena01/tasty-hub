@@ -216,6 +216,25 @@ const getMyRecipes = async (req, res) => {
   }
 };
 
+// Get recipes by user ID
+const getRecipesByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const recipes = await Recipe.findByUserId(userId);
+
+    res.json({
+      success: true,
+      recipes
+    });
+  } catch (error) {
+    console.error('Get user recipes error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching user recipes'
+    });
+  }
+};
+
 // Update recipe
 const updateRecipe = async (req, res) => {
   try {
@@ -443,11 +462,70 @@ const searchByIngredients = async (req, res) => {
   }
 };
 
+// Get recipes from followed users
+const getFollowingRecipes = async (req, res) => {
+  try {
+    const {
+      category,
+      difficulty,
+      minRating,
+      search,
+      sortBy,
+      page = 1,
+      limit = 12
+    } = req.query;
+
+    const offset = (page - 1) * limit;
+
+    // Build filter parameters
+    const filters = {
+      userId: req.user.id,
+      category,
+      difficulty,
+      minRating: minRating ? parseFloat(minRating) : null,
+      search,
+      sortBy,
+      limit: parseInt(limit),
+      offset
+    };
+
+    const recipes = await Recipe.findFromFollowedUsers(filters);
+
+    // Count total for pagination
+    const total = await Recipe.countFromFollowedUsers({
+      userId: req.user.id,
+      category,
+      difficulty,
+      minRating: minRating ? parseFloat(minRating) : null,
+      search
+    });
+
+    res.json({
+      success: true,
+      recipes,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get following recipes error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching following recipes'
+    });
+  }
+};
+
 module.exports = {
   createRecipe,
   getRecipeById,
   getAllRecipes,
   getMyRecipes,
+  getRecipesByUserId,
+  getFollowingRecipes,
   updateRecipe,
   deleteRecipe,
   searchByIngredients

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchRecipes,
   searchRecipesByIngredients,
+  fetchFollowingRecipes,
   setFilters,
   selectAllRecipes,
   selectRecipeLoading,
@@ -33,8 +34,19 @@ function BrowseRecipesPage() {
         page: pagination.page,
         limit: pagination.limit
       }));
+    } else if (filters.source === 'following') {
+      // Fetch recipes from followed users
+      dispatch(fetchFollowingRecipes({
+        category: filters.category,
+        difficulty: filters.difficulty,
+        minRating: filters.minRating,
+        search: filters.search,
+        sortBy: filters.sortBy,
+        page: pagination.page,
+        limit: pagination.limit
+      }));
     } else {
-      // Otherwise use regular search
+      // Otherwise use regular search (all recipes)
       dispatch(fetchRecipes({
         ...filters,
         page: pagination.page,
@@ -68,6 +80,17 @@ function BrowseRecipesPage() {
         category: filters.category,
         difficulty: filters.difficulty,
         minRating: filters.minRating,
+        page: newPage,
+        limit: pagination.limit
+      }));
+    } else if (filters.source === 'following') {
+      // Fetch recipes from followed users
+      dispatch(fetchFollowingRecipes({
+        category: filters.category,
+        difficulty: filters.difficulty,
+        minRating: filters.minRating,
+        search: filters.search,
+        sortBy: filters.sortBy,
         page: newPage,
         limit: pagination.limit
       }));

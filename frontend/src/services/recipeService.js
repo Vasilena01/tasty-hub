@@ -51,6 +51,12 @@ const recipeService = {
     return response.data;
   },
 
+  // Get recipes by user ID
+  getRecipesByUserId: async (userId) => {
+    const response = await axiosInstance.get(`/recipes/user/${userId}`);
+    return response.data;
+  },
+
   // Search recipes by ingredients
   searchByIngredients: async (filters = {}) => {
     const params = new URLSearchParams();
@@ -62,6 +68,21 @@ const recipeService = {
     if (filters.limit) params.append('limit', filters.limit);
 
     const response = await axiosInstance.get(`/recipes/search/by-ingredients?${params.toString()}`);
+    return response.data;
+  },
+
+  // Get recipes from followed users
+  getFollowingRecipes: async (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.category) params.append('category', filters.category);
+    if (filters.difficulty) params.append('difficulty', filters.difficulty);
+    if (filters.minRating) params.append('minRating', filters.minRating);
+    if (filters.search) params.append('search', filters.search);
+    if (filters.sortBy) params.append('sortBy', filters.sortBy);
+    if (filters.page) params.append('page', filters.page);
+    if (filters.limit) params.append('limit', filters.limit);
+
+    const response = await axiosInstance.get(`/recipes/following?${params.toString()}`);
     return response.data;
   }
 };

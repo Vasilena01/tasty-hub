@@ -413,6 +413,115 @@ class Recipe {
     const result = await db.query(query, values);
     return parseInt(result.rows[0].total);
   }
+
+  // Find recipes from followed users
+  static async findFromFollowedUsers({ userId, category, difficulty, minRating, search, sortBy, limit, offset }) {
+    let query = `
+      SELECT r.*, u.username, u.first_name, u.last_name
+      FROM recipes r
+      JOIN users u ON r.user_id = u.id
+      JOIN followers f ON r.user_id = f.followed_user_id
+      WHERE f.follower_user_id = $1
+    `;
+    const values = [userId];
+    let paramCount = 1;
+
+    if (category) {
+      paramCount++;
+      query += ` AND r.category = $${paramCount}`;
+      values.push(category);
+    }
+
+    if (difficulty) {
+      paramCount++;
+      query += ` AND r.difficulty = $${paramCount}`;
+      values.push(difficulty);
+    }
+
+    if (minRating) {
+      paramCount++;
+      query += ` AND r.average_rating >= $${paramCount}`;
+      values.push(minRating);
+    }
+
+    if (search) {
+      paramCount++;
+      query += ` AND (r.title ILIKE $${paramCount} OR r.description ILIKE $${paramCount})`;
+      values.push(`%${search}%`);
+    }
+
+    // Sorting
+    if (sortBy === 'rating') {
+      query += ' ORDER BY r.average_rating DESC, r.created_at DESC';
+    } else if (sortBy === 'newest') {
+      query += ' ORDER BY r.created_at DESC';
+    } else if (sortBy === 'quickest') {
+      query += ' ORDER BY r.cooking_time ASC';
+    } else {
+      query += ' ORDER BY r.created_at DESC';
+    }
+
+    if (limit) {
+      paramCount++;
+      query += ` LIMIT $${paramCount}`;
+      values.push(limit);
+    }
+
+    if (offset) {
+      paramCount++;
+      query += ` OFFSET $${paramCount}`;
+      values.push(offset);
+    }
+
+    const result = await db.query(query, values);
+    return result.rows.map(row => ({
+      ...row,
+      average_rating: row.average_rating ? parseFloat(row.average_rating) : 0,
+      cooking_time: parseInt(row.cooking_time),
+      servings: parseInt(row.servings),
+      total_ratings: parseInt(row.total_ratings),
+      total_saves: parseInt(row.total_saves)
+    }));
+  }
+
+  // Count recipes from followed users
+  static async countFromFollowedUsers({ userId, category, difficulty, minRating, search }) {
+    let query = `
+      SELECT COUNT(*) as total
+      FROM recipes r
+      JOIN followers f ON r.user_id = f.followed_user_id
+      WHERE f.follower_user_id = $1
+    `;
+    const values = [userId];
+    let paramCount = 1;
+
+    if (category) {
+      paramCount++;
+      query += ` AND r.category = $${paramCount}`;
+      values.push(category);
+    }
+
+    if (difficulty) {
+      paramCount++;
+      query += ` AND r.difficulty = $${paramCount}`;
+      values.push(difficulty);
+    }
+
+    if (minRating) {
+      paramCount++;
+      query += ` AND r.average_rating >= $${paramCount}`;
+      values.push(minRating);
+    }
+
+    if (search) {
+      paramCount++;
+      query += ` AND (r.title ILIKE $${paramCount} OR r.description ILIKE $${paramCount})`;
+      values.push(`%${search}%`);
+    }
+
+    const result = await db.query(query, values);
+    return parseInt(result.rows[0].total);
+  }
 }
 
 module.exports = Recipe;

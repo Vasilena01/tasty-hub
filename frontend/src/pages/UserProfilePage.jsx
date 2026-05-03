@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import followerService from '../services/followerService';
+import recipeService from '../services/recipeService';
+import userService from '../services/userService';
 import FollowButton from '../components/FollowButton';
+import RecipeGrid from '../components/recipes/RecipeGrid';
 import './UserProfilePage.css';
 
 const UserProfilePage = () => {
@@ -12,26 +15,22 @@ const UserProfilePage = () => {
   const [profileUser, setProfileUser] = useState(null);
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
+  const [recipes, setRecipes] = useState([]);
   const [counts, setCounts] = useState({ followers_count: 0, following_count: 0 });
   const [activeTab, setActiveTab] = useState('recipes'); // recipes, followers, following
   const [loading, setLoading] = useState(true);
+  const [recipesLoading, setRecipesLoading] = useState(false);
 
   useEffect(() => {
     fetchUserProfile();
     fetchFollowCounts();
+    fetchRecipes();
   }, [userId]);
 
   const fetchUserProfile = async () => {
     try {
-      // Fetch user details from backend (you'll need to create a getUserById endpoint)
-      // For now, using a placeholder
-      setProfileUser({
-        id: parseInt(userId),
-        username: 'User ' + userId,
-        first_name: 'John',
-        last_name: 'Doe',
-        profile_picture_url: null
-      });
+      const response = await userService.getUserById(userId);
+      setProfileUser(response.user);
     } catch (error) {
       console.error('Error fetching user profile:', error);
     } finally {
@@ -63,6 +62,18 @@ const UserProfilePage = () => {
       setFollowing(response.following);
     } catch (error) {
       console.error('Error fetching following:', error);
+    }
+  };
+
+  const fetchRecipes = async () => {
+    try {
+      setRecipesLoading(true);
+      const response = await recipeService.getRecipesByUserId(userId);
+      setRecipes(response.recipes || []);
+    } catch (error) {
+      console.error('Error fetching user recipes:', error);
+    } finally {
+      setRecipesLoading(false);
     }
   };
 
@@ -145,7 +156,12 @@ const UserProfilePage = () => {
       <div className="profile-content">
         {activeTab === 'recipes' && (
           <div className="recipes-tab">
-            <p>User's recipes will appear here</p>
+            <RecipeGrid
+              recipes={recipes}
+              loading={recipesLoading}
+              emptyMessage="No recipes yet"
+              showSaveButton={true}
+            />
           </div>
         )}
 
