@@ -49,6 +49,22 @@ class User {
     return result.rows[0];
   }
 
+  // Update user profile including email and username
+  static async updateProfile(id, { first_name, last_name, email, username }) {
+    const query = `
+      UPDATE users
+      SET first_name = COALESCE($1, first_name),
+          last_name = COALESCE($2, last_name),
+          email = COALESCE($3, email),
+          username = COALESCE($4, username)
+      WHERE id = $5
+      RETURNING id, username, email, first_name, last_name, profile_picture_url, updated_at
+    `;
+    const values = [first_name, last_name, email, username, id];
+    const result = await db.query(query, values);
+    return result.rows[0];
+  }
+
   // Update password
   static async updatePassword(id, password_hash) {
     const query = `

@@ -131,4 +131,61 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+// Update user profile
+const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { first_name, last_name, email, username } = req.body;
+
+    // Validate at least one field is provided
+    if (!first_name && !last_name && !email && !username) {
+      return res.status(400).json({
+        success: false,
+        error: 'At least one field is required to update'
+      });
+    }
+
+    // If email is being changed, check if it's already taken
+    if (email) {
+      const existingEmail = await User.findByEmail(email);
+      if (existingEmail && existingEmail.id !== userId) {
+        return res.status(400).json({
+          success: false,
+          error: 'Email already registered'
+        });
+      }
+    }
+
+    // If username is being changed, check if it's already taken
+    if (username) {
+      const existingUsername = await User.findByUsername(username);
+      if (existingUsername && existingUsername.id !== userId) {
+        return res.status(400).json({
+          success: false,
+          error: 'Username already taken'
+        });
+      }
+    }
+
+    // Update user
+    const updatedUser = await User.updateProfile(userId, {
+      first_name,
+      last_name,
+      email,
+      username
+    });
+
+    res.status(200).json({
+      success: true,
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error during profile update'
+    });
+  }
+};
+
+module.exports = { register, login, updateProfile };
