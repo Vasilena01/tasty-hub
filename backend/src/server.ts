@@ -39,7 +39,7 @@ app.use('/api/followers', followerRoutes);
 app.use('/api/users', userRoutes);
 
 // Health check endpoint
-app.get('/api/health', (req: Request, res: Response): void => {
+app.get('/api/health', (_req: Request, res: Response): void => {
   res.json({
     status: 'ok',
     message: 'Recipe Hub API is running',
@@ -48,7 +48,7 @@ app.get('/api/health', (req: Request, res: Response): void => {
 });
 
 // Test database connection
-app.get('/api/db-test', async (req: Request, res: Response): Promise<void> => {
+app.get('/api/db-test', async (_req: Request, res: Response): Promise<void> => {
   try {
     const result = await db.query('SELECT NOW()');
     res.json({
@@ -66,7 +66,7 @@ app.get('/api/db-test', async (req: Request, res: Response): Promise<void> => {
 });
 
 // 404 handler
-app.use((req: Request, res: Response): void => {
+app.use((_req: Request, res: Response): void => {
   res.status(404).json({
     status: 'error',
     message: 'Route not found'
@@ -74,7 +74,7 @@ app.use((req: Request, res: Response): void => {
 });
 
 // Error handler
-app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction): void => {
   console.error(err.stack);
   res.status(500).json({
     status: 'error',
