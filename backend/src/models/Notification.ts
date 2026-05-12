@@ -1,23 +1,32 @@
-const db = require('../config/database');
+import { Pool, QueryResult } from 'pg';
+import { INotification, INotificationCreateInput, INotificationUpdateInput } from '../types/models.types';
+
+const db: Pool = require('../config/database');
+
+interface NotificationQueryOptions {
+  limit?: number;
+  offset?: number;
+  unread?: boolean;
+}
 
 class Notification {
   // Create notification
-  static async create({ user_id, sender_user_id, type, recipe_id, message }) {
+  static async create(data: INotificationCreateInput): Promise<INotification> {
     const query = `
       INSERT INTO notifications (user_id, sender_user_id, type, recipe_id, message)
       VALUES ($1, $2, $3, $4, $5)
       RETURNING *
     `;
-    const result = await db.query(query, [user_id, sender_user_id, type, recipe_id, message]);
+    const result: QueryResult<INotification> = await db.query(query, [data.user_id, data.sender_user_id, data.type, data.recipe_id, data.message]);
     return result.rows[0];
   }
 
   // Create multiple notifications (bulk)
-  static async createMany(notifications) {
+  static async createMany(notifications: INotificationCreateInput[]): Promise<INotification[]> {
     if (notifications.length === 0) return [];
 
-    const values = [];
-    const placeholders = [];
+    const values: any[] = [];
+    const placeholders: string[] = [];
 
     notifications.forEach((notif, index) => {
       const base = index * 5;
@@ -37,12 +46,12 @@ class Notification {
       RETURNING *
     `;
 
-    const result = await db.query(query, values);
+    const result: QueryResult<INotification> = await db.query(query, values);
     return result.rows;
   }
 
   // Get user's notifications
-  static async findByUserId(userId, { limit, offset, unread } = {}) {
+  static async findByUserId(userId: number, options: NotificationQueryOptions = {}): Promise<any[]> {
     let query = `
       SELECT n.*, u.username as sender_username, u.profile_picture_url as sender_picture,
              r.title as recipe_title
@@ -51,65 +60,65 @@ class Notification {
       LEFT JOIN recipes r ON n.recipe_id = r.id
       WHERE n.user_id = $1
     `;
-    const values = [userId];
+    const values: any[] = [userId];
     let paramCount = 1;
 
-    if (unread !== undefined) {
+    if (options.unread !== undefined) {
       paramCount++;
       query += ` AND n.is_read = $${paramCount}`;
-      values.push(!unread); // Convert to boolean (unread=true means is_read=false)
+      values.push(!options.unread); // Convert to boolean (unread=true means is_read=false)
     }
 
     query += ' ORDER BY n.created_at DESC';
 
-    if (limit) {
+    if (options.limit) {
       paramCount++;
       query += ` LIMIT $${paramCount}`;
-      values.push(limit);
+      values.push(options.limit);
     }
 
-    if (offset) {
+    if (options.offset) {
       paramCount++;
       query += ` OFFSET $${paramCount}`;
-      values.push(offset);
+      values.push(options.offset);
     }
 
-    const result = await db.query(query, values);
+    const result: QueryResult = await db.query(query, values);
     return result.rows;
   }
 
   // Get unread count
-  static async getUnreadCount(userId) {
+  static async getUnreadCount(userId: number): Promise<number> {
     const query = 'SELECT COUNT(*) as count FROM notifications WHERE user_id = $1 AND is_read = FALSE';
-    const result = await db.query(query, [userId]);
+    const result: QueryResult = await db.query(query, [userId]);
     return parseInt(result.rows[0].count);
   }
 
   // Mark as read
-  static async markAsRead(id, userId) {
+  static async markAsRead(id: number, userId: number): Promise<INotification | undefined> {
     const query = 'UPDATE notifications SET is_read = TRUE WHERE id = $1 AND user_id = $2 RETURNING *';
-    const result = await db.query(query, [id, userId]);
+    const result: QueryResult<INotification> = await db.query(query, [id, userId]);
     return result.rows[0];
   }
 
   // Mark all as read
-  static async markAllAsRead(userId) {
+  static async markAllAsRead(userId: number): Promise<void> {
     const query = 'UPDATE notifications SET is_read = TRUE WHERE user_id = $1 AND is_read = FALSE';
     await db.query(query, [userId]);
   }
 
   // Delete notification
-  static async delete(id, userId) {
+  static async delete(id: number, userId: number): Promise<INotification | undefined> {
     const query = 'DELETE FROM notifications WHERE id = $1 AND user_id = $2 RETURNING *';
-    const result = await db.query(query, [id, userId]);
+    const result: QueryResult<INotification> = await db.query(query, [id, userId]);
     return result.rows[0];
   }
 
   // Delete all read notifications
-  static async deleteRead(userId) {
+  static async deleteRead(userId: number): Promise<void> {
     const query = 'DELETE FROM notifications WHERE user_id = $1 AND is_read = TRUE';
     await db.query(query, [userId]);
   }
 }
 
-module.exports = Notification;
+export default Notification;

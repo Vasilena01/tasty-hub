@@ -1,23 +1,26 @@
-const db = require('../config/database');
+import { Pool, QueryResult } from 'pg';
+import { IShoppingList, IShoppingListCreateInput, IShoppingListUpdateInput } from '../types/models.types';
+
+const db: Pool = require('../config/database');
 
 class ShoppingList {
   // Create shopping list item
-  static async create({ user_id, week_start_date, ingredient_name, quantity, unit, category }) {
+  static async create(data: IShoppingListCreateInput): Promise<IShoppingList> {
     const query = `
       INSERT INTO shopping_lists (user_id, week_start_date, ingredient_name, quantity, unit, category)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
     `;
-    const result = await db.query(query, [user_id, week_start_date, ingredient_name, quantity, unit, category]);
+    const result: QueryResult<IShoppingList> = await db.query(query, [data.user_id, data.week_start_date, data.ingredient_name, data.quantity, data.unit, data.category]);
     return result.rows[0];
   }
 
   // Bulk create shopping list items
-  static async createMany(items) {
+  static async createMany(items: IShoppingListCreateInput[]): Promise<IShoppingList[]> {
     if (items.length === 0) return [];
 
-    const values = [];
-    const placeholders = [];
+    const values: any[] = [];
+    const placeholders: string[] = [];
 
     items.forEach((item, index) => {
       const base = index * 6;
@@ -38,32 +41,32 @@ class ShoppingList {
       RETURNING *
     `;
 
-    const result = await db.query(query, values);
+    const result: QueryResult<IShoppingList> = await db.query(query, values);
     return result.rows;
   }
 
   // Get shopping list for a week
-  static async findByWeek(userId, weekStartDate) {
+  static async findByWeek(userId: number, weekStartDate: Date): Promise<IShoppingList[]> {
     const query = `
       SELECT * FROM shopping_lists
       WHERE user_id = $1 AND week_start_date = $2
       ORDER BY category, ingredient_name
     `;
-    const result = await db.query(query, [userId, weekStartDate]);
+    const result: QueryResult<IShoppingList> = await db.query(query, [userId, weekStartDate]);
     return result.rows;
   }
 
   // Update shopping list item
-  static async update(id, userId, updates) {
-    const fields = [];
-    const values = [];
+  static async update(id: number, userId: number, updates: IShoppingListUpdateInput): Promise<IShoppingList | null> {
+    const fields: string[] = [];
+    const values: any[] = [];
     let paramCount = 0;
 
     Object.keys(updates).forEach(key => {
-      if (updates[key] !== undefined) {
+      if ((updates as any)[key] !== undefined) {
         paramCount++;
         fields.push(`${key} = $${paramCount}`);
-        values.push(updates[key]);
+        values.push((updates as any)[key]);
       }
     });
 
@@ -81,40 +84,40 @@ class ShoppingList {
       RETURNING *
     `;
 
-    const result = await db.query(query, values);
+    const result: QueryResult<IShoppingList> = await db.query(query, values);
     return result.rows[0];
   }
 
   // Toggle item checked status
-  static async toggleChecked(id, userId) {
+  static async toggleChecked(id: number, userId: number): Promise<IShoppingList | undefined> {
     const query = `
       UPDATE shopping_lists
       SET is_checked = NOT is_checked
       WHERE id = $1 AND user_id = $2
       RETURNING *
     `;
-    const result = await db.query(query, [id, userId]);
+    const result: QueryResult<IShoppingList> = await db.query(query, [id, userId]);
     return result.rows[0];
   }
 
   // Delete shopping list for a week
-  static async deleteByWeek(userId, weekStartDate) {
+  static async deleteByWeek(userId: number, weekStartDate: Date): Promise<void> {
     const query = 'DELETE FROM shopping_lists WHERE user_id = $1 AND week_start_date = $2';
     await db.query(query, [userId, weekStartDate]);
   }
 
   // Delete single item
-  static async delete(id, userId) {
+  static async delete(id: number, userId: number): Promise<IShoppingList | undefined> {
     const query = 'DELETE FROM shopping_lists WHERE id = $1 AND user_id = $2 RETURNING *';
-    const result = await db.query(query, [id, userId]);
+    const result: QueryResult<IShoppingList> = await db.query(query, [id, userId]);
     return result.rows[0];
   }
 
   // Delete checked items
-  static async deleteChecked(userId, weekStartDate) {
+  static async deleteChecked(userId: number, weekStartDate: Date): Promise<void> {
     const query = 'DELETE FROM shopping_lists WHERE user_id = $1 AND week_start_date = $2 AND is_checked = TRUE';
     await db.query(query, [userId, weekStartDate]);
   }
 }
 
-module.exports = ShoppingList;
+export default ShoppingList;

@@ -1,18 +1,30 @@
-const db = require('../config/database');
+import { Pool, QueryResult } from 'pg';
+import { IRecipe, IRecipeCreateInput, IRecipeUpdateInput } from '../types/models.types';
+
+const db: Pool = require('../config/database');
+
+interface RecipeQueryFilters {
+  category?: string;
+  difficulty?: string;
+  minRating?: number;
+  search?: string;
+  sortBy?: string;
+  limit?: number;
+  offset?: number;
+}
+
+interface IngredientSearchFilters {
+  ingredients: string;
+  category?: string;
+  difficulty?: string;
+  minRating?: number;
+  limit?: number;
+  offset?: number;
+}
 
 class Recipe {
   // Create new recipe
-  static async create({
-    user_id,
-    title,
-    description,
-    category,
-    difficulty,
-    cooking_time,
-    servings,
-    image_url,
-    instructions
-  }) {
+  static async create(data: IRecipeCreateInput): Promise<IRecipe> {
     const query = `
       INSERT INTO recipes (
         user_id, title, description, category, difficulty,
@@ -22,15 +34,15 @@ class Recipe {
       RETURNING *
     `;
     const values = [
-      user_id, title, description, category, difficulty,
-      cooking_time, servings, image_url, instructions
+      data.user_id, data.title, data.description, data.category, data.difficulty,
+      data.cooking_time, data.servings, data.image_url, data.instructions
     ];
-    const result = await db.query(query, values);
+    const result: QueryResult<IRecipe> = await db.query(query, values);
     return result.rows[0];
   }
 
   // Find recipe by ID with creator info
-  static async findById(id) {
+  static async findById(id: number): Promise<any | null> {
     const query = `
       SELECT r.*,
              u.username, u.first_name, u.last_name, u.profile_picture_url
@@ -38,7 +50,7 @@ class Recipe {
       JOIN users u ON r.user_id = u.id
       WHERE r.id = $1
     `;
-    const result = await db.query(query, [id]);
+    const result: QueryResult = await db.query(query, [id]);
     const row = result.rows[0];
     if (!row) return null;
     // Convert numeric strings to numbers for JavaScript
@@ -53,64 +65,64 @@ class Recipe {
   }
 
   // Find all recipes with filters
-  static async findAll({ category, difficulty, minRating, search, sortBy, limit, offset }) {
+  static async findAll(filters: RecipeQueryFilters): Promise<any[]> {
     let query = `
       SELECT r.*, u.username, u.first_name, u.last_name
       FROM recipes r
       JOIN users u ON r.user_id = u.id
       WHERE 1=1
     `;
-    const values = [];
+    const values: any[] = [];
     let paramCount = 0;
 
-    if (category) {
+    if (filters.category) {
       paramCount++;
       query += ` AND r.category = $${paramCount}`;
-      values.push(category);
+      values.push(filters.category);
     }
 
-    if (difficulty) {
+    if (filters.difficulty) {
       paramCount++;
       query += ` AND r.difficulty = $${paramCount}`;
-      values.push(difficulty);
+      values.push(filters.difficulty);
     }
 
-    if (minRating) {
+    if (filters.minRating) {
       paramCount++;
       query += ` AND r.average_rating >= $${paramCount}`;
-      values.push(minRating);
+      values.push(filters.minRating);
     }
 
-    if (search) {
+    if (filters.search) {
       paramCount++;
       query += ` AND (r.title ILIKE $${paramCount} OR r.description ILIKE $${paramCount})`;
-      values.push(`%${search}%`);
+      values.push(`%${filters.search}%`);
     }
 
     // Sorting
-    if (sortBy === 'rating') {
+    if (filters.sortBy === 'rating') {
       query += ' ORDER BY r.average_rating DESC, r.created_at DESC';
-    } else if (sortBy === 'newest') {
+    } else if (filters.sortBy === 'newest') {
       query += ' ORDER BY r.created_at DESC';
-    } else if (sortBy === 'quickest') {
+    } else if (filters.sortBy === 'quickest') {
       query += ' ORDER BY r.cooking_time ASC';
     } else {
       query += ' ORDER BY r.created_at DESC';
     }
 
-    if (limit) {
+    if (filters.limit) {
       paramCount++;
       query += ` LIMIT $${paramCount}`;
-      values.push(limit);
+      values.push(filters.limit);
     }
 
-    if (offset) {
+    if (filters.offset) {
       paramCount++;
       query += ` OFFSET $${paramCount}`;
-      values.push(offset);
+      values.push(filters.offset);
     }
 
-    const result = await db.query(query, values);
+    const result: QueryResult = await db.query(query, values);
     // Convert numeric strings to numbers for JavaScript
     return result.rows.map(row => ({
       ...row,
@@ -123,51 +135,51 @@ class Recipe {
   }
 
   // Count all recipes with filters (for pagination)
-  static async countAll({ category, difficulty, minRating, search }) {
+  static async countAll(filters: RecipeQueryFilters): Promise<number> {
     let query = `
       SELECT COUNT(*) as total
       FROM recipes r
       WHERE 1=1
     `;
-    const values = [];
+    const values: any[] = [];
     let paramCount = 0;
 
-    if (category) {
+    if (filters.category) {
       paramCount++;
       query += ` AND r.category = $${paramCount}`;
-      values.push(category);
+      values.push(filters.category);
     }
 
-    if (difficulty) {
+    if (filters.difficulty) {
       paramCount++;
       query += ` AND r.difficulty = $${paramCount}`;
-      values.push(difficulty);
+      values.push(filters.difficulty);
     }
 
-    if (minRating) {
+    if (filters.minRating) {
       paramCount++;
       query += ` AND r.average_rating >= $${paramCount}`;
-      values.push(minRating);
+      values.push(filters.minRating);
     }
 
-    if (search) {
+    if (filters.search) {
       paramCount++;
       query += ` AND (r.title ILIKE $${paramCount} OR r.description ILIKE $${paramCount})`;
-      values.push(`%${search}%`);
+      values.push(`%${filters.search}%`);
     }
 
-    const result = await db.query(query, values);
+    const result: QueryResult = await db.query(query, values);
     return parseInt(result.rows[0].total);
   }
 
   // Find recipes by user
-  static async findByUserId(userId) {
+  static async findByUserId(userId: number): Promise<any[]> {
     const query = `
       SELECT * FROM recipes
       WHERE user_id = $1
       ORDER BY created_at DESC
     `;
-    const result = await db.query(query, [userId]);
+    const result: QueryResult = await db.query(query, [userId]);
     // Convert numeric strings to numbers for JavaScript
     return result.rows.map(row => ({
       ...row,
@@ -180,16 +192,16 @@ class Recipe {
   }
 
   // Update recipe
-  static async update(id, updates) {
-    const fields = [];
-    const values = [];
+  static async update(id: number, updates: IRecipeUpdateInput): Promise<IRecipe | null> {
+    const fields: string[] = [];
+    const values: any[] = [];
     let paramCount = 0;
 
     Object.keys(updates).forEach(key => {
-      if (updates[key] !== undefined) {
+      if ((updates as any)[key] !== undefined) {
         paramCount++;
         fields.push(`${key} = $${paramCount}`);
-        values.push(updates[key]);
+        values.push((updates as any)[key]);
       }
     });
 
@@ -205,19 +217,19 @@ class Recipe {
       RETURNING *
     `;
 
-    const result = await db.query(query, values);
+    const result: QueryResult<IRecipe> = await db.query(query, values);
     return result.rows[0];
   }
 
   // Delete recipe
-  static async delete(id) {
+  static async delete(id: number): Promise<IRecipe | undefined> {
     const query = 'DELETE FROM recipes WHERE id = $1 RETURNING id';
-    const result = await db.query(query, [id]);
+    const result: QueryResult<IRecipe> = await db.query(query, [id]);
     return result.rows[0];
   }
 
   // Update rating statistics
-  static async updateRatingStats(recipeId) {
+  static async updateRatingStats(recipeId: number): Promise<any> {
     const query = `
       UPDATE recipes
       SET average_rating = (
@@ -229,12 +241,12 @@ class Recipe {
       WHERE id = $1
       RETURNING average_rating, total_ratings
     `;
-    const result = await db.query(query, [recipeId]);
+    const result: QueryResult = await db.query(query, [recipeId]);
     return result.rows[0];
   }
 
   // Update saves count
-  static async updateSavesCount(recipeId) {
+  static async updateSavesCount(recipeId: number): Promise<any> {
     const query = `
       UPDATE recipes
       SET total_saves = (
@@ -243,14 +255,14 @@ class Recipe {
       WHERE id = $1
       RETURNING total_saves
     `;
-    const result = await db.query(query, [recipeId]);
+    const result: QueryResult = await db.query(query, [recipeId]);
     return result.rows[0];
   }
 
   // Find recipes by ingredients with fuzzy matching
-  static async findByIngredients({ ingredients, category, difficulty, minRating, limit, offset }) {
+  static async findByIngredients(filters: IngredientSearchFilters): Promise<any[]> {
     // Parse comma-separated ingredients and trim whitespace
-    const ingredientList = ingredients
+    const ingredientList = filters.ingredients
       .split(',')
       .map(ing => ing.trim().toLowerCase())
       .filter(ing => ing.length > 0);
@@ -306,44 +318,44 @@ class Recipe {
       WHERE 1=1
     `;
 
-    const values = ingredientList.map(ing => `%${ing}%`);
+    const values: any[] = ingredientList.map(ing => `%${ing}%`);
     let paramCount = ingredientList.length;
 
     // Apply filters
-    if (category) {
+    if (filters.category) {
       paramCount++;
       query += ` AND r.category = $${paramCount}`;
-      values.push(category);
+      values.push(filters.category);
     }
 
-    if (difficulty) {
+    if (filters.difficulty) {
       paramCount++;
       query += ` AND r.difficulty = $${paramCount}`;
-      values.push(difficulty);
+      values.push(filters.difficulty);
     }
 
-    if (minRating) {
+    if (filters.minRating) {
       paramCount++;
       query += ` AND r.average_rating >= $${paramCount}`;
-      values.push(minRating);
+      values.push(filters.minRating);
     }
 
     // Sort by match count (descending), then by rating (descending)
     query += ' ORDER BY mr.match_count DESC, r.average_rating DESC, r.created_at DESC';
 
-    if (limit) {
+    if (filters.limit) {
       paramCount++;
       query += ` LIMIT $${paramCount}`;
-      values.push(limit);
+      values.push(filters.limit);
     }
 
-    if (offset) {
+    if (filters.offset) {
       paramCount++;
       query += ` OFFSET $${paramCount}`;
-      values.push(offset);
+      values.push(filters.offset);
     }
 
-    const result = await db.query(query, values);
+    const result: QueryResult = await db.query(query, values);
 
     // Convert numeric strings to numbers and structure matched ingredients
     return result.rows.map(row => ({
@@ -361,8 +373,8 @@ class Recipe {
   }
 
   // Count recipes matching ingredients (for pagination)
-  static async countByIngredients({ ingredients, category, difficulty, minRating }) {
-    const ingredientList = ingredients
+  static async countByIngredients(filters: IngredientSearchFilters): Promise<number> {
+    const ingredientList = filters.ingredients
       .split(',')
       .map(ing => ing.trim().toLowerCase())
       .filter(ing => ing.length > 0);
@@ -389,33 +401,33 @@ class Recipe {
       WHERE 1=1
     `;
 
-    const values = ingredientList.map(ing => `%${ing}%`);
+    const values: any[] = ingredientList.map(ing => `%${ing}%`);
     let paramCount = ingredientList.length;
 
-    if (category) {
+    if (filters.category) {
       paramCount++;
       query += ` AND r.category = $${paramCount}`;
-      values.push(category);
+      values.push(filters.category);
     }
 
-    if (difficulty) {
+    if (filters.difficulty) {
       paramCount++;
       query += ` AND r.difficulty = $${paramCount}`;
-      values.push(difficulty);
+      values.push(filters.difficulty);
     }
 
-    if (minRating) {
+    if (filters.minRating) {
       paramCount++;
       query += ` AND r.average_rating >= $${paramCount}`;
-      values.push(minRating);
+      values.push(filters.minRating);
     }
 
-    const result = await db.query(query, values);
+    const result: QueryResult = await db.query(query, values);
     return parseInt(result.rows[0].total);
   }
 
   // Find recipes from followed users
-  static async findFromFollowedUsers({ userId, category, difficulty, minRating, search, sortBy, limit, offset }) {
+  static async findFromFollowedUsers(filters: RecipeQueryFilters & { userId: number }): Promise<any[]> {
     let query = `
       SELECT r.*, u.username, u.first_name, u.last_name
       FROM recipes r
@@ -423,57 +435,57 @@ class Recipe {
       JOIN followers f ON r.user_id = f.followed_user_id
       WHERE f.follower_user_id = $1
     `;
-    const values = [userId];
+    const values: any[] = [filters.userId];
     let paramCount = 1;
 
-    if (category) {
+    if (filters.category) {
       paramCount++;
       query += ` AND r.category = $${paramCount}`;
-      values.push(category);
+      values.push(filters.category);
     }
 
-    if (difficulty) {
+    if (filters.difficulty) {
       paramCount++;
       query += ` AND r.difficulty = $${paramCount}`;
-      values.push(difficulty);
+      values.push(filters.difficulty);
     }
 
-    if (minRating) {
+    if (filters.minRating) {
       paramCount++;
       query += ` AND r.average_rating >= $${paramCount}`;
-      values.push(minRating);
+      values.push(filters.minRating);
     }
 
-    if (search) {
+    if (filters.search) {
       paramCount++;
       query += ` AND (r.title ILIKE $${paramCount} OR r.description ILIKE $${paramCount})`;
-      values.push(`%${search}%`);
+      values.push(`%${filters.search}%`);
     }
 
     // Sorting
-    if (sortBy === 'rating') {
+    if (filters.sortBy === 'rating') {
       query += ' ORDER BY r.average_rating DESC, r.created_at DESC';
-    } else if (sortBy === 'newest') {
+    } else if (filters.sortBy === 'newest') {
       query += ' ORDER BY r.created_at DESC';
-    } else if (sortBy === 'quickest') {
+    } else if (filters.sortBy === 'quickest') {
       query += ' ORDER BY r.cooking_time ASC';
     } else {
       query += ' ORDER BY r.created_at DESC';
     }
 
-    if (limit) {
+    if (filters.limit) {
       paramCount++;
       query += ` LIMIT $${paramCount}`;
-      values.push(limit);
+      values.push(filters.limit);
     }
 
-    if (offset) {
+    if (filters.offset) {
       paramCount++;
       query += ` OFFSET $${paramCount}`;
-      values.push(offset);
+      values.push(filters.offset);
     }
 
-    const result = await db.query(query, values);
+    const result: QueryResult = await db.query(query, values);
     return result.rows.map(row => ({
       ...row,
       average_rating: row.average_rating ? parseFloat(row.average_rating) : 0,
@@ -485,43 +497,43 @@ class Recipe {
   }
 
   // Count recipes from followed users
-  static async countFromFollowedUsers({ userId, category, difficulty, minRating, search }) {
+  static async countFromFollowedUsers(filters: RecipeQueryFilters & { userId: number }): Promise<number> {
     let query = `
       SELECT COUNT(*) as total
       FROM recipes r
       JOIN followers f ON r.user_id = f.followed_user_id
       WHERE f.follower_user_id = $1
     `;
-    const values = [userId];
+    const values: any[] = [filters.userId];
     let paramCount = 1;
 
-    if (category) {
+    if (filters.category) {
       paramCount++;
       query += ` AND r.category = $${paramCount}`;
-      values.push(category);
+      values.push(filters.category);
     }
 
-    if (difficulty) {
+    if (filters.difficulty) {
       paramCount++;
       query += ` AND r.difficulty = $${paramCount}`;
-      values.push(difficulty);
+      values.push(filters.difficulty);
     }
 
-    if (minRating) {
+    if (filters.minRating) {
       paramCount++;
       query += ` AND r.average_rating >= $${paramCount}`;
-      values.push(minRating);
+      values.push(filters.minRating);
     }
 
-    if (search) {
+    if (filters.search) {
       paramCount++;
       query += ` AND (r.title ILIKE $${paramCount} OR r.description ILIKE $${paramCount})`;
-      values.push(`%${search}%`);
+      values.push(`%${filters.search}%`);
     }
 
-    const result = await db.query(query, values);
+    const result: QueryResult = await db.query(query, values);
     return parseInt(result.rows[0].total);
   }
 }
 
-module.exports = Recipe;
+export default Recipe;
