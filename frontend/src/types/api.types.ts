@@ -7,12 +7,17 @@ export interface ApiResponse<T = any> {
   token?: string;
 }
 
-// Paginated response
-export interface PaginatedResponse<T> extends ApiResponse<T[]> {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
+// Paginated response for recipes
+export interface PaginatedResponse<T> {
+  success: boolean;
+  recipes: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  error?: string;
 }
 
 // Auth request/response types
