@@ -235,6 +235,9 @@ fi
 - No TypeScript errors in frontend codebase
 </success_criteria>
 
+
+Note: TypeScript enabled with relaxed mode (allowJs: true, strict: false) to maintain working builds during migration. Full type safety with strict mode will be enabled in Plan 07.
+
 <output>
 After completion, create `.planning/phases/16-typescript-migration/16-05b-SUMMARY.md`
 </output>
