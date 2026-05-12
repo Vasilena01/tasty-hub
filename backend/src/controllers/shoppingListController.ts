@@ -6,6 +6,11 @@ import ShoppingList from '../models/ShoppingList';
 import { AuthRequest } from '../middleware/authMiddleware';
 import { ApiResponse } from '../types/api.types';
 
+// Helper to extract string from params
+const getParamAsString = (param: string | string[]): string => {
+  return Array.isArray(param) ? param[0] : param;
+};
+
 // Category mapping for ingredient classification
 const categoryMap: Record<string, string[]> = {
   'Vegetables': ['tomato', 'onion', 'garlic', 'carrot', 'potato', 'lettuce', 'spinach', 'bell pepper', 'cucumber', 'broccoli', 'cabbage', 'celery', 'zucchini', 'eggplant', 'mushroom', 'peas', 'corn', 'green beans'],
@@ -57,7 +62,7 @@ const generateShoppingList = async (
   res: Response<ApiResponse>
 ): Promise<void> => {
   try {
-    const { weekStartDate } = req.params;
+    const weekStartDate = getParamAsString(req.params.weekStartDate);
     const userId = req.user?.id;
 
     if (!userId) {
@@ -168,7 +173,7 @@ const getShoppingListForWeek = async (
   res: Response<ApiResponse>
 ): Promise<void> => {
   try {
-    const { weekStartDate } = req.params;
+    const weekStartDate = getParamAsString(req.params.weekStartDate);
     const userId = req.user?.id;
 
     if (!userId) {
@@ -213,7 +218,7 @@ const toggleItemChecked = async (
   res: Response<ApiResponse>
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParamAsString(req.params.id);
     const userId = req.user?.id;
 
     if (!userId) {
@@ -257,7 +262,7 @@ const updateShoppingListItem = async (
   res: Response<ApiResponse>
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParamAsString(req.params.id);
     const userId = req.user?.id;
     const { ingredient_name, quantity, unit } = req.body;
 
@@ -378,7 +383,7 @@ const deleteItem = async (
   res: Response<ApiResponse>
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParamAsString(req.params.id);
     const userId = req.user?.id;
 
     if (!userId) {
@@ -422,7 +427,7 @@ const clearCheckedItems = async (
   res: Response<ApiResponse>
 ): Promise<void> => {
   try {
-    const { weekStartDate } = req.params;
+    const weekStartDate = getParamAsString(req.params.weekStartDate);
     const userId = req.user?.id;
 
     if (!userId) {
@@ -467,7 +472,7 @@ const deleteShoppingList = async (
   res: Response<ApiResponse>
 ): Promise<void> => {
   try {
-    const { weekStartDate } = req.params;
+    const weekStartDate = getParamAsString(req.params.weekStartDate);
     const userId = req.user?.id;
 
     if (!userId) {

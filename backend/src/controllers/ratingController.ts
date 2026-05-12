@@ -1,8 +1,13 @@
-import { Request, Response } from 'express';
+import { Response, Request } from 'express';
 import Rating from '../models/Rating';
 import { AuthRequest } from '../middleware/authMiddleware';
 import { ApiResponse } from '../types/api.types';
 import { IRating } from '../types/models.types';
+
+// Helper to extract string from params
+const getParamAsString = (param: string | string[]): string => {
+  return Array.isArray(param) ? param[0] : param;
+};
 
 interface SubmitRatingRequestBody {
   recipeId: number;
@@ -12,12 +17,12 @@ interface SubmitRatingRequestBody {
 interface RatingData {
   userRating: IRating;
   averageRating: number | null;
-  ratingCount: number;
+  ratingCount: string;
 }
 
 interface RecipeRatingsData {
   averageRating: number | null;
-  ratingCount: number;
+  ratingCount: string;
   userRating: number | null;
 }
 
@@ -94,7 +99,7 @@ const getRecipeRatings = async (
   res: Response<ApiResponse<RecipeRatingsData>>
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParamAsString(req.params.id);
     const userId = (req as AuthRequest).user?.id; // Optional - to get user's rating
 
     // Get average rating and count
@@ -133,7 +138,7 @@ const deleteRating = async (
   res: Response<ApiResponse>
 ): Promise<void> => {
   try {
-    const { recipeId } = req.params;
+    const recipeId = getParamAsString(req.params.recipeId);
     const userId = req.user?.id;
 
     if (!userId) {

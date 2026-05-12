@@ -4,6 +4,11 @@ import { AuthRequest } from '../middleware/authMiddleware';
 import { ApiResponse } from '../types/api.types';
 import { IFollower } from '../types/models.types';
 
+// Helper to extract string from params
+const getParamAsString = (param: string | string[]): string => {
+  return Array.isArray(param) ? param[0] : param;
+};
+
 // Follow a user
 const followUser = async (
   req: AuthRequest,
@@ -11,7 +16,7 @@ const followUser = async (
 ): Promise<void> => {
   try {
     const followerUserId = req.user?.id; // From auth middleware
-    const { userId } = req.params; // User to follow
+    const userId = getParamAsString(req.params.userId); // User to follow
 
     if (!followerUserId) {
       res.status(401).json({
@@ -65,7 +70,7 @@ const unfollowUser = async (
 ): Promise<void> => {
   try {
     const followerUserId = req.user?.id;
-    const { userId } = req.params;
+    const userId = getParamAsString(req.params.userId);
 
     if (!followerUserId) {
       res.status(401).json({
@@ -104,7 +109,7 @@ const getFollowers = async (
   res: Response<ApiResponse<any[]>>
 ): Promise<void> => {
   try {
-    const { userId } = req.params;
+    const userId = getParamAsString(req.params.userId);
 
     const followers = await Follower.getFollowers(parseInt(userId, 10));
 
@@ -127,7 +132,7 @@ const getFollowing = async (
   res: Response<ApiResponse<any[]>>
 ): Promise<void> => {
   try {
-    const { userId } = req.params;
+    const userId = getParamAsString(req.params.userId);
 
     const following = await Follower.getFollowing(parseInt(userId, 10));
 
@@ -151,7 +156,7 @@ const checkFollowStatus = async (
 ): Promise<void> => {
   try {
     const currentUserId = req.user?.id;
-    const { userId } = req.params;
+    const userId = getParamAsString(req.params.userId);
 
     if (!currentUserId) {
       res.status(401).json({
@@ -182,13 +187,16 @@ const getFollowCounts = async (
   res: Response<ApiResponse<{ followerCount: number; followingCount: number }>>
 ): Promise<void> => {
   try {
-    const { userId } = req.params;
+    const userId = getParamAsString(req.params.userId);
 
     const counts = await Follower.getCounts(parseInt(userId, 10));
 
     res.status(200).json({
       success: true,
-      data: counts
+      data: {
+        followerCount: counts.followers_count,
+        followingCount: counts.following_count
+      }
     });
   } catch (error) {
     console.error('Get follow counts error:', error);

@@ -5,6 +5,11 @@ import { AuthRequest } from '../middleware/authMiddleware';
 import { ApiResponse } from '../types/api.types';
 import { IMealPlan } from '../types/models.types';
 
+// Helper to extract string from params
+const getParamAsString = (param: string | string[]): string => {
+  return Array.isArray(param) ? param[0] : param;
+};
+
 interface AddToMealPlanRequest {
   recipe_id: number;
   week_start_date: string;
@@ -25,7 +30,7 @@ const getMealPlanForWeek = async (
   res: Response<ApiResponse<any[]>>
 ): Promise<void> => {
   try {
-    const { weekStartDate } = req.params;
+    const weekStartDate = getParamAsString(req.params.weekStartDate);
     const userId = req.user?.id;
 
     if (!userId) {
@@ -46,7 +51,7 @@ const getMealPlanForWeek = async (
       return;
     }
 
-    const mealPlan = await MealPlan.findByWeek(userId, weekStartDate);
+    const mealPlan = await MealPlan.findByWeek(userId, new Date(weekStartDate));
 
     res.status(200).json({
       success: true,
@@ -133,13 +138,13 @@ const addRecipeToMealPlan = async (
     const mealPlan = await MealPlan.create({
       user_id: userId,
       recipe_id,
-      week_start_date,
+      week_start_date: new Date(week_start_date),
       day_of_week,
       meal_type: meal_type.toLowerCase()
     });
 
     // Fetch the full meal plan entry with recipe details
-    const fullMealPlan = await MealPlan.findByWeek(userId, week_start_date);
+    const fullMealPlan = await MealPlan.findByWeek(userId, new Date(week_start_date));
     const createdEntry = fullMealPlan.find(
       mp => mp.day_of_week === day_of_week && mp.meal_type === meal_type.toLowerCase()
     );
@@ -167,7 +172,7 @@ const updateMealPlanEntry = async (
   res: Response<ApiResponse>
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParamAsString(req.params.id);
     const { recipe_id } = req.body as UpdateMealPlanRequest;
     const userId = req.user?.id;
 
@@ -236,7 +241,7 @@ const deleteMealPlanEntry = async (
   res: Response<ApiResponse>
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParamAsString(req.params.id);
     const userId = req.user?.id;
 
     if (!userId) {

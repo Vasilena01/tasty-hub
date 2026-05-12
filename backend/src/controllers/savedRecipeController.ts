@@ -1,8 +1,13 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import SavedRecipe from '../models/SavedRecipe';
 import { AuthRequest } from '../middleware/authMiddleware';
 import { ApiResponse } from '../types/api.types';
 import { ISavedRecipe } from '../types/models.types';
+
+// Helper to extract string from params
+const getParamAsString = (param: string | string[]): string => {
+  return Array.isArray(param) ? param[0] : param;
+};
 
 interface SavedRecipesData {
   recipes: any[];
@@ -21,7 +26,7 @@ const saveRecipe = async (
   res: Response<ApiResponse<ISavedRecipe>>
 ): Promise<void> => {
   try {
-    const { recipeId } = req.params;
+    const recipeId = getParamAsString(req.params.recipeId);
     const userId = req.user?.id;
 
     if (!userId) {
@@ -120,7 +125,7 @@ const unsaveRecipe = async (
   res: Response<ApiResponse>
 ): Promise<void> => {
   try {
-    const { recipeId } = req.params;
+    const recipeId = getParamAsString(req.params.recipeId);
     const userId = req.user?.id;
 
     if (!userId) {
@@ -164,7 +169,7 @@ const checkSaved = async (
   res: Response<ApiResponse<{ isSaved: boolean }>>
 ): Promise<void> => {
   try {
-    const { recipeId } = req.params;
+    const recipeId = getParamAsString(req.params.recipeId);
     const userId = req.user?.id;
 
     if (!userId) {

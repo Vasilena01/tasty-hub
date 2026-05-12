@@ -185,7 +185,7 @@ const login = async (
     );
 
     // Exclude password_hash from response
-    const { password_hash: _, ...userWithoutPassword } = user;
+    const { password_hash: _password, ...userWithoutPassword } = user;
 
     // Return success response
     res.status(200).json({
@@ -285,7 +285,7 @@ const updateProfile = async (
 
 // Get all users for discovery
 const getAllUsers = async (
-  req: Request,
+  _req: Request,
   res: Response<ApiResponse<UserDiscoveryResult[]>>
 ): Promise<void> => {
   try {
