@@ -185,7 +185,7 @@ const login = async (
     );
 
     // Exclude password_hash from response
-    const { password_hash: _password, ..._userWithoutPassword } = user;
+    const { password_hash: _password } = user;
 
     // Return success response
     res.status(200).json({

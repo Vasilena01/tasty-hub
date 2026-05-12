@@ -4,7 +4,7 @@ import { addManualItem, closeAddModal } from '../../redux/slices/shoppingListSli
 import './AddItemModal.css';
 
 interface AddItemModalProps {
-  currentWeek: Date;
+  currentWeek: string | null;
 }
 
 const AddItemModal: React.FC<AddItemModalProps> = ({ currentWeek }) => {
@@ -18,6 +18,11 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ currentWeek }) => {
 
     if (!ingredientName.trim() || !quantity.trim()) {
       alert('Please fill in ingredient name and quantity');
+      return;
+    }
+
+    if (!currentWeek) {
+      alert('No week selected');
       return;
     }
 

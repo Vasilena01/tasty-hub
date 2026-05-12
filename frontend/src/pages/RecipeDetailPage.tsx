@@ -21,7 +21,7 @@ const RecipeDetailPage: React.FC = () => {
   // Fetch recipe on mount
   useEffect(() => {
     if (id) {
-      dispatch(fetchRecipeById(id));
+      dispatch(fetchRecipeById(parseInt(id, 10)));
     }
   }, [dispatch, id]);
 
@@ -89,8 +89,8 @@ const RecipeDetailPage: React.FC = () => {
             src={getImageUrl(recipe.image_url)}
             alt={recipe.title}
             className="recipe-main-image"
-            onError={(e) => {
-              e.target.src = '/placeholder-recipe.jpg';
+            onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+              e.currentTarget.src = '/placeholder-recipe.jpg';
             }}
           />
         </div>
@@ -142,7 +142,7 @@ const RecipeDetailPage: React.FC = () => {
           <h2>Ingredients</h2>
           {recipe.ingredients && recipe.ingredients.length > 0 ? (
             <ul className="ingredients-list">
-              {recipe.ingredients.map((ing, index) => (
+              {recipe.ingredients.map((ing: any, index: number) => (
                 <li key={index} className="ingredient-item">
                   <span className="ingredient-quantity">{ing.quantity}</span>
                   <span className="ingredient-unit">{ing.unit}</span>

@@ -116,7 +116,7 @@ export const fetchMyRecipes = createAsyncThunk<
   async (_, { rejectWithValue }) => {
     try {
       const data = await recipeService.getMyRecipes();
-      return data.recipes;
+      return data.recipes || [];
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch your recipes');
     }
@@ -242,7 +242,7 @@ const recipeSlice = createSlice({
       })
       .addCase(fetchRecipes.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Failed to fetch recipes';
+        state.error = action.payload as string || 'Failed to fetch recipes';
       })
 
       // Fetch single recipe
@@ -257,7 +257,7 @@ const recipeSlice = createSlice({
       })
       .addCase(fetchRecipeById.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string || null;
       })
 
       // Create recipe
@@ -274,7 +274,7 @@ const recipeSlice = createSlice({
       })
       .addCase(createRecipe.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string || null;
       })
 
       // Update recipe
@@ -290,7 +290,7 @@ const recipeSlice = createSlice({
       })
       .addCase(updateRecipe.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string || null;
       })
 
       // Delete recipe
@@ -308,7 +308,7 @@ const recipeSlice = createSlice({
       })
       .addCase(deleteRecipe.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string || null;
       })
 
       // Fetch my recipes
@@ -325,7 +325,7 @@ const recipeSlice = createSlice({
       })
       .addCase(fetchMyRecipes.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string || null;
       })
 
       // Search by ingredients
@@ -345,7 +345,7 @@ const recipeSlice = createSlice({
       })
       .addCase(searchRecipesByIngredients.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string || null;
       })
 
       // Fetch following recipes
@@ -365,7 +365,7 @@ const recipeSlice = createSlice({
       })
       .addCase(fetchFollowingRecipes.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string || null;
       });
   }
 });

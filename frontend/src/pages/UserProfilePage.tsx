@@ -11,7 +11,7 @@ import './UserProfilePage.css';
 
 const UserProfilePage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
-  const { user: currentUser } = useAppSelector((state) => state.auth);
+  const { user: _currentUser } = useAppSelector((state) => state.auth);
 
   const [profileUser, setProfileUser] = useState<User | null>(null);
   const [followers, setFollowers] = useState<any[]>([]);
@@ -29,8 +29,9 @@ const UserProfilePage: React.FC = () => {
   }, [userId]);
 
   const fetchUserProfile = async () => {
+    if (!userId) return;
     try {
-      const response = await userService.getUserById(userId);
+      const response = await userService.getUserById(parseInt(userId));
       setProfileUser(response.user);
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -40,8 +41,9 @@ const UserProfilePage: React.FC = () => {
   };
 
   const fetchFollowCounts = async () => {
+    if (!userId) return;
     try {
-      const response = await followerService.getFollowCounts(userId);
+      const response = await followerService.getFollowCounts(parseInt(userId));
       setCounts(response.counts);
     } catch (error) {
       console.error('Error fetching follow counts:', error);
@@ -49,27 +51,30 @@ const UserProfilePage: React.FC = () => {
   };
 
   const fetchFollowers = async () => {
+    if (!userId) return;
     try {
-      const response = await followerService.getFollowers(userId);
-      setFollowers(response.followers);
+      const response = await followerService.getFollowers(parseInt(userId));
+      setFollowers(response.followers || []);
     } catch (error) {
       console.error('Error fetching followers:', error);
     }
   };
 
   const fetchFollowing = async () => {
+    if (!userId) return;
     try {
-      const response = await followerService.getFollowing(userId);
-      setFollowing(response.following);
+      const response = await followerService.getFollowing(parseInt(userId));
+      setFollowing(response.following || []);
     } catch (error) {
       console.error('Error fetching following:', error);
     }
   };
 
   const fetchRecipes = async () => {
+    if (!userId) return;
     try {
       setRecipesLoading(true);
-      const response = await recipeService.getRecipesByUserId(userId);
+      const response = await recipeService.getRecipesByUserId(parseInt(userId));
       setRecipes(response.recipes || []);
     } catch (error) {
       console.error('Error fetching user recipes:', error);
@@ -78,7 +83,7 @@ const UserProfilePage: React.FC = () => {
     }
   };
 
-  const handleTabChange = (tab) => {
+  const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     if (tab === 'followers' && followers.length === 0) {
       fetchFollowers();
@@ -123,7 +128,7 @@ const UserProfilePage: React.FC = () => {
               </div>
             </div>
 
-            {profileUser && (
+            {profileUser && userId && (
               <FollowButton
                 userId={parseInt(userId)}
                 onFollowChange={handleFollowChange}

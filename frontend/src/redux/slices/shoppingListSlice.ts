@@ -47,7 +47,7 @@ export const generateShoppingList = createAsyncThunk<
   async (weekStartDate, { rejectWithValue }) => {
     try {
       const response = await shoppingListService.generateShoppingList(weekStartDate);
-      return { weekStartDate, items: response.data.items, message: response.message };
+      return { weekStartDate, items: response.data || [], message: response.message || 'Shopping list generated successfully' };
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to generate shopping list');
     }
@@ -63,7 +63,7 @@ export const fetchShoppingList = createAsyncThunk<
   async (weekStartDate, { rejectWithValue }) => {
     try {
       const response = await shoppingListService.getShoppingListForWeek(weekStartDate);
-      return { weekStartDate, items: response.data };
+      return { weekStartDate, items: response.data || [] };
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch shopping list');
     }
@@ -79,6 +79,9 @@ export const toggleItemChecked = createAsyncThunk<
   async (itemId, { rejectWithValue }) => {
     try {
       const response = await shoppingListService.toggleItemChecked(itemId);
+      if (!response.data) {
+        return rejectWithValue('No data returned from server');
+      }
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to toggle item');
@@ -95,6 +98,9 @@ export const updateItem = createAsyncThunk<
   async ({ itemId, updates }, { rejectWithValue }) => {
     try {
       const response = await shoppingListService.updateShoppingListItem(itemId, updates);
+      if (!response.data) {
+        return rejectWithValue('No data returned from server');
+      }
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to update item');
@@ -102,15 +108,26 @@ export const updateItem = createAsyncThunk<
   }
 );
 
+// Manual item input type
+interface ManualItemInput {
+  ingredient_name: string;
+  quantity: string | number;
+  unit: string;
+  week_start_date: Date | string;
+}
+
 export const addManualItem = createAsyncThunk<
   ShoppingListItem,
-  Partial<ShoppingListItem>,
+  ManualItemInput,
   { rejectValue: string }
 >(
   'shoppingList/addManual',
   async (itemData, { rejectWithValue }) => {
     try {
       const response = await shoppingListService.addManualItem(itemData);
+      if (!response.data) {
+        return rejectWithValue('No data returned from server');
+      }
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to add item');
@@ -203,7 +220,7 @@ const shoppingListSlice = createSlice({
       })
       .addCase(generateShoppingList.rejected, (state, action) => {
         state.generating = false;
-        state.error = action.payload || 'Failed to generate shopping list';
+        state.error = action.payload as string || 'Failed to generate shopping list';
       })
       // Fetch shopping list
       .addCase(fetchShoppingList.pending, (state) => {
@@ -217,7 +234,7 @@ const shoppingListSlice = createSlice({
       })
       .addCase(fetchShoppingList.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Failed to fetch shopping list';
+        state.error = action.payload as string || 'Failed to fetch shopping list';
       })
       // Toggle item checked
       .addCase(toggleItemChecked.fulfilled, (state, action) => {
@@ -227,7 +244,7 @@ const shoppingListSlice = createSlice({
         }
       })
       .addCase(toggleItemChecked.rejected, (state, action) => {
-        state.error = action.payload || 'Failed to toggle item';
+        state.error = action.payload as string || 'Failed to toggle item';
       })
       // Update item
       .addCase(updateItem.fulfilled, (state, action) => {
@@ -238,7 +255,7 @@ const shoppingListSlice = createSlice({
         state.successMessage = 'Item updated successfully';
       })
       .addCase(updateItem.rejected, (state, action) => {
-        state.error = action.payload || 'Failed to update item';
+        state.error = action.payload as string || 'Failed to update item';
       })
       // Add manual item
       .addCase(addManualItem.fulfilled, (state, action) => {
@@ -247,7 +264,7 @@ const shoppingListSlice = createSlice({
         state.successMessage = 'Item added successfully';
       })
       .addCase(addManualItem.rejected, (state, action) => {
-        state.error = action.payload || 'Failed to add item';
+        state.error = action.payload as string || 'Failed to add item';
       })
       // Delete item
       .addCase(deleteItem.fulfilled, (state, action) => {
@@ -255,7 +272,7 @@ const shoppingListSlice = createSlice({
         state.successMessage = 'Item deleted successfully';
       })
       .addCase(deleteItem.rejected, (state, action) => {
-        state.error = action.payload || 'Failed to delete item';
+        state.error = action.payload as string || 'Failed to delete item';
       })
       // Clear checked items
       .addCase(clearCheckedItems.fulfilled, (state) => {
@@ -263,7 +280,7 @@ const shoppingListSlice = createSlice({
         state.successMessage = 'Checked items cleared successfully';
       })
       .addCase(clearCheckedItems.rejected, (state, action) => {
-        state.error = action.payload || 'Failed to clear checked items';
+        state.error = action.payload as string || 'Failed to clear checked items';
       })
       // Delete shopping list
       .addCase(deleteShoppingList.fulfilled, (state) => {
@@ -271,7 +288,7 @@ const shoppingListSlice = createSlice({
         state.successMessage = 'Shopping list deleted successfully';
       })
       .addCase(deleteShoppingList.rejected, (state, action) => {
-        state.error = action.payload || 'Failed to delete shopping list';
+        state.error = action.payload as string || 'Failed to delete shopping list';
       });
   }
 });
@@ -287,7 +304,10 @@ export const {
 export default shoppingListSlice.reducer;
 
 // Selectors
-export const selectShoppingListItems = (state: any) => state.shoppingList.items;
-export const selectShoppingListByCategory = (state: any) => groupByCategory(state.shoppingList.items);
-export const selectCheckedCount = (state: any) => state.shoppingList.items.filter((item: ShoppingListItem) => item.is_checked).length;
-export const selectTotalCount = (state: any) => state.shoppingList.items.length;
+export const selectShoppingListItems = (state: any) => state.shoppingList.items || [];
+export const selectShoppingListByCategory = (state: any) => {
+  const items = state.shoppingList.items || [];
+  return groupByCategory(items);
+};
+export const selectCheckedCount = (state: any) => (state.shoppingList.items || []).filter((item: ShoppingListItem) => item.is_checked).length;
+export const selectTotalCount = (state: any) => (state.shoppingList.items || []).length;

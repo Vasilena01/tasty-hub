@@ -18,12 +18,14 @@ const MealPlannerPage: React.FC = () => {
   }, [dispatch]);
 
   const handlePreviousWeek = () => {
+    if (!currentWeek) return;
     const prevWeek = getPreviousWeek(currentWeek);
     dispatch(setCurrentWeek(prevWeek));
     dispatch(fetchMealPlanForWeek(prevWeek));
   };
 
   const handleNextWeek = () => {
+    if (!currentWeek) return;
     const nextWeek = getNextWeek(currentWeek);
     dispatch(setCurrentWeek(nextWeek));
     dispatch(fetchMealPlanForWeek(nextWeek));

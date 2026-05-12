@@ -159,12 +159,13 @@ const DashboardPage: React.FC = () => {
             </div>
 
             <div className="button-group">
-              <span
-                onClick={loading ? undefined : handleSubmit}
+              <button
+                type="submit"
                 className={`save-link ${loading ? 'disabled' : ''}`}
+                disabled={loading}
               >
                 {loading ? 'Saving...' : 'Save Changes'}
-              </span>
+              </button>
               <button
                 type="button"
                 onClick={handleEditToggle}

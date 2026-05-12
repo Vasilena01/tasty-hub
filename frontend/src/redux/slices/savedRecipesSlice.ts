@@ -1,10 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { SavedRecipe } from '../../types/models.types';
+import { Recipe } from '../../types/models.types';
 import savedRecipesService from '../../services/savedRecipesService';
 
-// State interface
+// State interface - store Recipe objects directly
 interface SavedRecipesState {
-  savedRecipes: SavedRecipe[];
+  savedRecipes: Recipe[];
   savedRecipeIds: number[];
   loading: boolean;
   error: string | null;
@@ -19,7 +19,7 @@ const initialState: SavedRecipesState = {
 
 // Fetch all saved recipes for the current user
 export const fetchSavedRecipes = createAsyncThunk<
-  SavedRecipe[],
+  Recipe[],
   void,
   { rejectValue: string }
 >(
@@ -27,7 +27,8 @@ export const fetchSavedRecipes = createAsyncThunk<
   async (_, { rejectWithValue }) => {
     try {
       const response = await savedRecipesService.fetchSavedRecipes();
-      return response.data.recipes; // Backend returns data.recipes
+      // Backend returns { data: { recipes: Recipe[] } }
+      return response.data?.recipes || [];
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch saved recipes');
     }
@@ -36,15 +37,15 @@ export const fetchSavedRecipes = createAsyncThunk<
 
 // Save a recipe
 export const saveRecipe = createAsyncThunk<
-  SavedRecipe,
+  number, // Just return the recipe ID
   number,
   { rejectValue: string }
 >(
   'savedRecipes/save',
   async (recipeId, { rejectWithValue }) => {
     try {
-      const response = await savedRecipesService.saveRecipe(recipeId);
-      return response.data; // Backend returns data (the saved recipe object)
+      await savedRecipesService.saveRecipe(recipeId);
+      return recipeId; // Return the recipeId instead
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to save recipe');
     }
@@ -78,7 +79,7 @@ export const checkIfSaved = createAsyncThunk<
   async (recipeId, { rejectWithValue }) => {
     try {
       const response = await savedRecipesService.checkIfSaved(recipeId);
-      return { recipeId, isSaved: response.data.isSaved }; // Backend returns data.isSaved
+      return { recipeId, isSaved: response.data?.isSaved || false }; // Backend returns data.isSaved
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to check saved status');
     }
@@ -108,24 +109,24 @@ const savedRecipesSlice = createSlice({
       .addCase(fetchSavedRecipes.fulfilled, (state, action) => {
         state.loading = false;
         state.savedRecipes = action.payload;
-        state.savedRecipeIds = action.payload.map(sr => sr.recipe_id);
+        state.savedRecipeIds = action.payload.map(recipe => recipe.id);
       })
       .addCase(fetchSavedRecipes.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Failed to fetch saved recipes';
+        state.error = action.payload as string || 'Failed to fetch saved recipes';
       })
       // Save recipe
       .addCase(saveRecipe.pending, (state) => {
         state.error = null;
       })
       .addCase(saveRecipe.fulfilled, (state, action) => {
-        state.savedRecipes.push(action.payload);
-        if (!state.savedRecipeIds.includes(action.payload.recipe_id)) {
-          state.savedRecipeIds.push(action.payload.recipe_id);
+        const recipeId = action.payload;
+        if (!state.savedRecipeIds.includes(recipeId)) {
+          state.savedRecipeIds.push(recipeId);
         }
       })
       .addCase(saveRecipe.rejected, (state, action) => {
-        state.error = action.payload || 'Failed to save recipe';
+        state.error = action.payload as string || 'Failed to save recipe';
       })
       // Unsave recipe
       .addCase(unsaveRecipe.pending, (state) => {
@@ -133,11 +134,11 @@ const savedRecipesSlice = createSlice({
       })
       .addCase(unsaveRecipe.fulfilled, (state, action) => {
         const recipeId = action.payload;
-        state.savedRecipes = state.savedRecipes.filter(sr => sr.recipe_id !== recipeId);
+        state.savedRecipes = state.savedRecipes.filter(recipe => recipe.id !== recipeId);
         state.savedRecipeIds = state.savedRecipeIds.filter(id => id !== recipeId);
       })
       .addCase(unsaveRecipe.rejected, (state, action) => {
-        state.error = action.payload || 'Failed to unsave recipe';
+        state.error = action.payload as string || 'Failed to unsave recipe';
       })
       // Check if saved
       .addCase(checkIfSaved.fulfilled, (state, action) => {

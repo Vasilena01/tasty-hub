@@ -58,6 +58,7 @@ export interface RecipeQueryParams {
   sortBy?: string;
   page?: number;
   limit?: number;
+  ingredients?: string;
 }
 
 // Ingredient search types

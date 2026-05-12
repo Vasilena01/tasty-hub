@@ -22,8 +22,8 @@ interface RecipeFormData {
   cooking_time: number;
   servings: number;
   instructions: string;
-  ingredients: IngredientFormData[];
-  image?: FileList;
+  ingredients: IngredientFormData[] | undefined;
+  image: FileList | undefined;
 }
 
 // Initial data type for editing
@@ -93,7 +93,7 @@ const recipeSchema = yup.object().shape({
       })
     )
     .min(1, 'At least one ingredient is required'),
-  image: yup.mixed().test('required', 'Recipe image is required', function(value: any) {
+  image: yup.mixed<FileList>().optional().test('required', 'Recipe image is required', function(value: any) {
     // Allow if editing with existing image
     if (this.options.context?.hasExistingImage) return true;
     // Check if file is selected
@@ -124,7 +124,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
     handleSubmit,
     formState: { errors }
   } = useForm<RecipeFormData>({
-    resolver: yupResolver(recipeSchema),
+    resolver: yupResolver(recipeSchema) as any,
     defaultValues,
     context: { hasExistingImage: !!initialData?.image_url }
   });
@@ -148,7 +148,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
     formData.append('instructions', data.instructions);
 
     // Append ingredients as JSON string
-    formData.append('ingredients', JSON.stringify(data.ingredients));
+    formData.append('ingredients', JSON.stringify(data.ingredients || []));
 
     // Append image file if selected
     if (data.image && data.image.length > 0) {

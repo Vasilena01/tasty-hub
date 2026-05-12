@@ -20,7 +20,7 @@ const MyRecipesPage: React.FC = () => {
   const error = useAppSelector((state) => state.recipes.error);
   const deleteSuccess = useAppSelector((state) => state.recipes.deleteSuccess);
 
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: number; title: string } | null>(null);
 
   // Fetch recipes on mount
   useEffect(() => {
@@ -44,7 +44,7 @@ const MyRecipesPage: React.FC = () => {
     }
   }, [error, dispatch]);
 
-  const handleDeleteClick = (recipe) => {
+  const handleDeleteClick = (recipe: any): void => {
     setDeleteConfirm(recipe);
   };
 
@@ -59,7 +59,7 @@ const MyRecipesPage: React.FC = () => {
   };
 
   // Build full image URL
-  const getImageUrl = (imageUrl) => {
+  const getImageUrl = (imageUrl: string) => {
     if (!imageUrl) return '/placeholder-recipe.jpg';
     return imageUrl.startsWith('http')
       ? imageUrl
@@ -67,7 +67,7 @@ const MyRecipesPage: React.FC = () => {
   };
 
   // Safely format rating - handle both number and string types
-  const formatRating = (rating) => {
+  const formatRating = (rating: number | string) => {
     const numRating = typeof rating === 'number' ? rating : parseFloat(rating) || 0;
     return numRating.toFixed(1);
   };
@@ -104,15 +104,15 @@ const MyRecipesPage: React.FC = () => {
         </div>
       ) : (
         <div className="my-recipes-grid">
-          {recipes.map(recipe => (
+          {recipes.map((recipe: any) => (
             <div key={recipe.id} className="my-recipe-card">
               <Link to={`/recipes/${recipe.id}`} className="recipe-link">
                 <div className="recipe-image">
                   <img
                     src={getImageUrl(recipe.image_url)}
                     alt={recipe.title}
-                    onError={(e) => {
-                      e.target.src = '/placeholder-recipe.jpg';
+                    onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                      e.currentTarget.src = '/placeholder-recipe.jpg';
                     }}
                   />
                 </div>

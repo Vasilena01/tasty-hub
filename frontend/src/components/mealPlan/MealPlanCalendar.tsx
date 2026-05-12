@@ -15,7 +15,7 @@ interface MealPlanWithRecipe extends MealPlan {
 
 interface MealPlanCalendarProps {
   mealPlans: MealPlanWithRecipe[];
-  weekStartDate: Date;
+  weekStartDate: Date | string;
 }
 
 const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ mealPlans, weekStartDate }) => {

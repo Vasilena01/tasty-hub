@@ -35,7 +35,7 @@ const CreateRecipePage: React.FC = () => {
     }
   }, [error, dispatch]);
 
-  const handleSubmit = async (formData) => {
+  const handleSubmit = async (formData: FormData): Promise<void> => {
     dispatch(createRecipe(formData));
   };
 

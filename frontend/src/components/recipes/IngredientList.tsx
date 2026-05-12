@@ -9,17 +9,12 @@ interface IngredientField {
   unit: string;
 }
 
-interface RecipeFormData {
-  ingredients: IngredientField[];
-  [key: string]: any;
-}
-
 interface IngredientListProps {
   fields: IngredientField[];
   register: UseFormRegister<any>;
   remove: UseFieldArrayRemove;
   append: UseFieldArrayAppend<any>;
-  errors: FieldErrors<RecipeFormData>;
+  errors: FieldErrors<any>;
 }
 
 const IngredientList: React.FC<IngredientListProps> = ({
@@ -33,6 +28,9 @@ const IngredientList: React.FC<IngredientListProps> = ({
     append({ name: '', quantity: '', unit: '' });
   };
 
+  // Cast ingredients errors to any to allow array indexing
+  const ingredientErrors = errors?.ingredients as any;
+
   return (
     <div className="ingredient-list">
       <label className="ingredient-list-label">Ingredients *</label>
@@ -45,10 +43,10 @@ const IngredientList: React.FC<IngredientListProps> = ({
                 type="text"
                 placeholder="Ingredient (e.g., Flour)"
                 {...register(`ingredients.${index}.name`)}
-                className={errors?.ingredients?.[index]?.name ? 'input-error' : ''}
+                className={ingredientErrors?.[index]?.name ? 'input-error' : ''}
               />
-              {errors?.ingredients?.[index]?.name && (
-                <span className="field-error">{errors.ingredients[index]?.name?.message}</span>
+              {ingredientErrors?.[index]?.name && (
+                <span className="field-error">{ingredientErrors[index]?.name?.message}</span>
               )}
             </div>
 
@@ -57,10 +55,10 @@ const IngredientList: React.FC<IngredientListProps> = ({
                 type="text"
                 placeholder="Qty (e.g., 2)"
                 {...register(`ingredients.${index}.quantity`)}
-                className={errors?.ingredients?.[index]?.quantity ? 'input-error' : ''}
+                className={ingredientErrors?.[index]?.quantity ? 'input-error' : ''}
               />
-              {errors?.ingredients?.[index]?.quantity && (
-                <span className="field-error">{errors.ingredients[index]?.quantity?.message}</span>
+              {ingredientErrors?.[index]?.quantity && (
+                <span className="field-error">{ingredientErrors[index]?.quantity?.message}</span>
               )}
             </div>
 
@@ -69,10 +67,10 @@ const IngredientList: React.FC<IngredientListProps> = ({
                 type="text"
                 placeholder="Unit (e.g., cups)"
                 {...register(`ingredients.${index}.unit`)}
-                className={errors?.ingredients?.[index]?.unit ? 'input-error' : ''}
+                className={ingredientErrors?.[index]?.unit ? 'input-error' : ''}
               />
-              {errors?.ingredients?.[index]?.unit && (
-                <span className="field-error">{errors.ingredients[index]?.unit?.message}</span>
+              {ingredientErrors?.[index]?.unit && (
+                <span className="field-error">{ingredientErrors[index]?.unit?.message}</span>
               )}
             </div>
           </div>

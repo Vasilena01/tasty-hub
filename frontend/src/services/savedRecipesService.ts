@@ -2,9 +2,16 @@ import axiosInstance from './axiosConfig';
 import { Recipe } from '../types/models.types';
 import { ApiResponse } from '../types/api.types';
 
+interface SavedRecipesResponse {
+  recipes: Recipe[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
 // Fetch all saved recipes for the authenticated user
-const fetchSavedRecipes = async (): Promise<ApiResponse<Recipe[]>> => {
-  const response = await axiosInstance.get<ApiResponse<Recipe[]>>('/saved-recipes');
+const fetchSavedRecipes = async (): Promise<ApiResponse<SavedRecipesResponse>> => {
+  const response = await axiosInstance.get<ApiResponse<SavedRecipesResponse>>('/saved-recipes');
   return response.data;
 };
 

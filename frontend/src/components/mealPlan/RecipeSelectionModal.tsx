@@ -14,7 +14,7 @@ interface SelectedSlot {
 interface RecipeSelectionModalProps {
   isOpen: boolean;
   selectedSlot: SelectedSlot | null;
-  currentWeek: Date | string;
+  currentWeek: Date | string | null;
 }
 
 const RecipeSelectionModal: React.FC<RecipeSelectionModalProps> = ({
@@ -30,7 +30,7 @@ const RecipeSelectionModal: React.FC<RecipeSelectionModalProps> = ({
     state.recipes.myRecipeIds?.map(id => state.recipes.entities[id]).filter((r): r is Recipe => !!r) || []
   );
   const savedRecipes = useAppSelector(state =>
-    (state.savedRecipes.savedRecipes || []).map(sr => sr.recipe).filter((r): r is Recipe => !!r)
+    state.savedRecipes.savedRecipes || []
   );
   const mealPlans = useAppSelector(state => state.mealPlan.mealPlans);
 
@@ -57,6 +57,9 @@ const RecipeSelectionModal: React.FC<RecipeSelectionModalProps> = ({
   );
 
   const handleSelectRecipe = (recipeId: number): void => {
+    if (!currentWeek) return;
+    const weekString = typeof currentWeek === 'string' ? currentWeek : currentWeek.toISOString().split('T')[0];
+
     if (existingMealPlan) {
       // Update existing entry
       dispatch(updateMealPlan({ id: existingMealPlan.id, recipeId }));
@@ -64,7 +67,7 @@ const RecipeSelectionModal: React.FC<RecipeSelectionModalProps> = ({
       // Create new entry
       dispatch(addRecipeToSlot({
         recipe_id: recipeId,
-        week_start_date: currentWeek,
+        week_start_date: weekString,
         day_of_week: selectedSlot.day_of_week,
         meal_type: selectedSlot.meal_type
       }));

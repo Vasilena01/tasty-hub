@@ -47,6 +47,7 @@ const ShoppingListPage: React.FC = () => {
       }, 3000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [successMessage, dispatch]);
 
   useEffect(() => {
@@ -56,15 +57,18 @@ const ShoppingListPage: React.FC = () => {
       }, 5000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [error, dispatch]);
 
-  const handleWeekChange = (direction) => {
+  const handleWeekChange = (direction: 'next' | 'prev') => {
+    if (!currentWeek) return;
     const newWeek = direction === 'next' ? getNextWeek(currentWeek) : getPreviousWeek(currentWeek);
     dispatch(setCurrentWeek(newWeek));
     dispatch(fetchShoppingList(newWeek));
   };
 
   const handleGenerate = () => {
+    if (!currentWeek) return;
     dispatch(generateShoppingList(currentWeek));
   };
 
@@ -73,14 +77,16 @@ const ShoppingListPage: React.FC = () => {
       alert('No checked items to clear');
       return;
     }
+    if (!currentWeek) return;
     if (window.confirm(`Clear ${checkedCount} checked item(s)?`)) {
       dispatch(clearCheckedItems(currentWeek));
     }
   };
 
   const handleRegenerateConfirm = () => {
+    if (!currentWeek) return;
     dispatch(deleteShoppingList(currentWeek)).then(() => {
-      dispatch(generateShoppingList(currentWeek));
+      dispatch(generateShoppingList(currentWeek!));
       setShowRegenerateConfirm(false);
     });
   };
@@ -174,7 +180,6 @@ const ShoppingListPage: React.FC = () => {
             key={category}
             category={category}
             items={itemsByCategory[category]}
-            currentWeek={currentWeek}
           />
         ))}
       </div>

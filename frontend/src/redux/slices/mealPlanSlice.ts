@@ -32,7 +32,7 @@ export const fetchMealPlanForWeek = createAsyncThunk<
   async (weekStartDate, { rejectWithValue }) => {
     try {
       const response = await mealPlanService.getMealPlanForWeek(weekStartDate);
-      return { weekStartDate, mealPlans: response.data };
+      return { weekStartDate, mealPlans: response.data || [] };
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch meal plan');
     }
@@ -41,13 +41,16 @@ export const fetchMealPlanForWeek = createAsyncThunk<
 
 export const addRecipeToSlot = createAsyncThunk<
   MealPlan,
-  { user_id: number; recipe_id: number; week_start_date: string; day_of_week: number; meal_type: string },
+  { recipe_id: number; week_start_date: string; day_of_week: number; meal_type: string },
   { rejectValue: string }
 >(
   'mealPlan/addRecipe',
   async (mealPlanData, { rejectWithValue }) => {
     try {
       const response = await mealPlanService.addRecipeToSlot(mealPlanData);
+      if (!response.data) {
+        return rejectWithValue('No data returned from server');
+      }
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to add recipe');
@@ -64,6 +67,9 @@ export const updateMealPlan = createAsyncThunk<
   async ({ id, recipeId }, { rejectWithValue }) => {
     try {
       const response = await mealPlanService.updateMealPlanEntry(id, recipeId);
+      if (!response.data) {
+        return rejectWithValue('No data returned from server');
+      }
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to update meal plan');
@@ -121,7 +127,7 @@ const mealPlanSlice = createSlice({
       })
       .addCase(fetchMealPlanForWeek.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Failed to fetch meal plan';
+        state.error = action.payload as string || 'Failed to fetch meal plan';
       })
       // Add recipe
       .addCase(addRecipeToSlot.fulfilled, (state, action) => {
@@ -130,7 +136,7 @@ const mealPlanSlice = createSlice({
         state.selectedSlot = null;
       })
       .addCase(addRecipeToSlot.rejected, (state, action) => {
-        state.error = action.payload || 'Failed to add recipe';
+        state.error = action.payload as string || 'Failed to add recipe';
       })
       // Update meal plan
       .addCase(updateMealPlan.fulfilled, (state, action) => {

@@ -56,10 +56,10 @@ const SavedRecipesPage: React.FC = () => {
         </div>
       ) : (
         <div className="saved-recipes-grid">
-          {savedRecipes.map((savedRecipe) => (
+          {savedRecipes.map((recipe) => (
             <RecipeCard
-              key={savedRecipe.recipe_id}
-              recipe={savedRecipe}
+              key={recipe.id}
+              recipe={recipe}
               showSaveButton={true}
             />
           ))}

@@ -22,7 +22,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({ userId, onFollowChange }) =
   const checkFollowStatus = async (): Promise<void> => {
     try {
       const response = await followerService.checkFollowStatus(userId, token!);
-      setIsFollowing(response.isFollowing);
+      setIsFollowing(response.isFollowing ?? false);
     } catch (error) {
       console.error('Error checking follow status:', error);
     }

@@ -17,7 +17,8 @@ const EditRecipePage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const recipe = useAppSelector(selectRecipeById(id));
+  const recipeId = id ? parseInt(id, 10) : 0;
+  const recipe = useAppSelector(selectRecipeById(recipeId));
   const loading = useAppSelector((state) => state.recipes.loading);
   const error = useAppSelector((state) => state.recipes.error);
   const updateSuccess = useAppSelector((state) => state.recipes.updateSuccess);
@@ -27,10 +28,10 @@ const EditRecipePage: React.FC = () => {
 
   // Fetch recipe on mount
   useEffect(() => {
-    if (id) {
-      dispatch(fetchRecipeById(id));
+    if (recipeId && recipeId !== 0) {
+      dispatch(fetchRecipeById(recipeId));
     }
-  }, [dispatch, id]);
+  }, [dispatch, recipeId]);
 
   // Check ownership when recipe loads
   useEffect(() => {
@@ -61,8 +62,9 @@ const EditRecipePage: React.FC = () => {
     }
   }, [error, dispatch]);
 
-  const handleSubmit = async (formData) => {
-    dispatch(updateRecipe({ id, formData }));
+  const handleSubmit = async (formData: FormData): Promise<void> => {
+    if (!recipeId || recipeId === 0) return;
+    dispatch(updateRecipe({ id: recipeId, formData }));
   };
 
   if (loading && !initialDataLoaded) {
@@ -94,7 +96,7 @@ const EditRecipePage: React.FC = () => {
     cooking_time: recipe.cooking_time || '',
     servings: recipe.servings || '',
     instructions: recipe.instructions || '',
-    ingredients: recipe.ingredients?.map(ing => ({
+    ingredients: recipe.ingredients?.map((ing: any) => ({
       name: ing.ingredient_name || ing.name || '',
       quantity: ing.quantity || '',
       unit: ing.unit || ''

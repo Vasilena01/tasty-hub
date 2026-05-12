@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { User } from '../types/models.types';
 import FollowButton from '../components/FollowButton';
 import './DiscoverUsersPage.css';
 
+interface UserWithStats extends User {
+  recipe_count?: number;
+  followers_count?: number;
+}
+
 const DiscoverUsersPage: React.FC = () => {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<UserWithStats[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
