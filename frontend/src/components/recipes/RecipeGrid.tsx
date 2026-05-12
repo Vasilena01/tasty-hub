@@ -1,7 +1,23 @@
+import React from 'react';
 import RecipeCard from './RecipeCard';
+import { Recipe } from '../../types/models.types';
 import './RecipeGrid.css';
 
-function RecipeGrid({ recipes, loading, emptyMessage = 'No recipes found', showIngredients = false, showSaveButton = false }) {
+interface RecipeGridProps {
+  recipes: Recipe[];
+  loading: boolean;
+  emptyMessage?: string;
+  showIngredients?: boolean;
+  showSaveButton?: boolean;
+}
+
+const RecipeGrid: React.FC<RecipeGridProps> = ({
+  recipes,
+  loading,
+  emptyMessage = 'No recipes found',
+  showIngredients = false,
+  showSaveButton = false
+}) => {
   if (loading) {
     return (
       <div className="recipe-grid-loading">
@@ -31,6 +47,6 @@ function RecipeGrid({ recipes, loading, emptyMessage = 'No recipes found', showI
       ))}
     </div>
   );
-}
+};
 
 export default RecipeGrid;

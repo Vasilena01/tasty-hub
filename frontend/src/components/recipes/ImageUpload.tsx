@@ -1,9 +1,22 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent, DragEvent } from 'react';
+import { UseFormRegister, FieldError } from 'react-hook-form';
 import './ImageUpload.css';
 
-function ImageUpload({ register, error, existingImage = null, name = 'image' }) {
-  const [preview, setPreview] = useState(existingImage);
-  const [dragActive, setDragActive] = useState(false);
+interface ImageUploadProps {
+  register: UseFormRegister<any>;
+  error?: FieldError;
+  existingImage?: string | null;
+  name?: string;
+}
+
+const ImageUpload: React.FC<ImageUploadProps> = ({
+  register,
+  error,
+  existingImage = null,
+  name = 'image'
+}) => {
+  const [preview, setPreview] = useState<string | null>(existingImage);
+  const [dragActive, setDragActive] = useState<boolean>(false);
 
   // Build full URL for existing image
   useEffect(() => {
@@ -15,14 +28,14 @@ function ImageUpload({ register, error, existingImage = null, name = 'image' }) 
     }
   }, [existingImage]);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0];
     if (file) {
       validateAndPreview(file, e);
     }
   };
 
-  const validateAndPreview = (file, e) => {
+  const validateAndPreview = (file: File, e?: ChangeEvent<HTMLInputElement>): boolean => {
     // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert('File size exceeds 5MB limit');
@@ -40,13 +53,13 @@ function ImageUpload({ register, error, existingImage = null, name = 'image' }) 
     // Generate preview
     const reader = new FileReader();
     reader.onloadend = () => {
-      setPreview(reader.result);
+      setPreview(reader.result as string);
     };
     reader.readAsDataURL(file);
     return true;
   };
 
-  const handleDrag = (e) => {
+  const handleDrag = (e: DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === 'dragenter' || e.type === 'dragover') {
@@ -56,18 +69,18 @@ function ImageUpload({ register, error, existingImage = null, name = 'image' }) 
     }
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
-      if (validateAndPreview(file, null)) {
+      if (validateAndPreview(file)) {
         // Update the file input programmatically
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
-        const input = document.getElementById(`${name}-input`);
+        const input = document.getElementById(`${name}-input`) as HTMLInputElement;
         if (input) {
           input.files = dataTransfer.files;
           // Trigger change event for react-hook-form
@@ -78,9 +91,9 @@ function ImageUpload({ register, error, existingImage = null, name = 'image' }) 
     }
   };
 
-  const handleRemove = () => {
+  const handleRemove = (): void => {
     setPreview(null);
-    const input = document.getElementById(`${name}-input`);
+    const input = document.getElementById(`${name}-input`) as HTMLInputElement;
     if (input) {
       input.value = '';
     }
@@ -135,6 +148,6 @@ function ImageUpload({ register, error, existingImage = null, name = 'image' }) 
       {error && <span className="image-error">{error.message}</span>}
     </div>
   );
-}
+};
 
 export default ImageUpload;

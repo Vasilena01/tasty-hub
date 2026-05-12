@@ -1,14 +1,22 @@
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, FormEvent, ChangeEvent } from 'react';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setFilters, selectBrowseFilters } from '../../redux/slices/recipeSlice';
 import './SearchBar.css';
 
-function SearchBar({ onSearch, placeholder = 'Search recipes...' }) {
-  const dispatch = useDispatch();
-  const filters = useSelector(selectBrowseFilters);
-  const [searchText, setSearchText] = useState(filters.search || '');
+interface SearchBarProps {
+  onSearch?: (searchText: string) => void;
+  placeholder?: string;
+}
 
-  const handleSubmit = (e) => {
+const SearchBar: React.FC<SearchBarProps> = ({
+  onSearch,
+  placeholder = 'Search recipes...'
+}) => {
+  const dispatch = useAppDispatch();
+  const filters = useAppSelector(selectBrowseFilters);
+  const [searchText, setSearchText] = useState<string>(filters.search || '');
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     dispatch(setFilters({ search: searchText }));
     if (onSearch) {
@@ -16,7 +24,7 @@ function SearchBar({ onSearch, placeholder = 'Search recipes...' }) {
     }
   };
 
-  const handleClear = () => {
+  const handleClear = (): void => {
     setSearchText('');
     dispatch(setFilters({ search: '' }));
     if (onSearch) {
@@ -31,7 +39,7 @@ function SearchBar({ onSearch, placeholder = 'Search recipes...' }) {
         <input
           type="text"
           value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)}
           placeholder={placeholder}
           className="search-input"
         />
@@ -51,6 +59,6 @@ function SearchBar({ onSearch, placeholder = 'Search recipes...' }) {
       </button>
     </form>
   );
-}
+};
 
 export default SearchBar;

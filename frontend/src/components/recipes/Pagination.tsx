@@ -1,14 +1,27 @@
+import React from 'react';
 import './Pagination.css';
 
-function Pagination({ pagination, onPageChange }) {
+interface PaginationInfo {
+  page: number;
+  totalPages: number;
+  total: number;
+  limit: number;
+}
+
+interface PaginationProps {
+  pagination: PaginationInfo;
+  onPageChange: (page: number) => void;
+}
+
+const Pagination: React.FC<PaginationProps> = ({ pagination, onPageChange }) => {
   const { page, totalPages, total, limit } = pagination;
 
   // Don't render if no pages or only one page
   if (totalPages <= 1) return null;
 
   // Calculate displayed page numbers
-  const getPageNumbers = () => {
-    const pages = [];
+  const getPageNumbers = (): number[] => {
+    const pages: number[] = [];
     const maxVisible = 5;
 
     let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
@@ -114,6 +127,6 @@ function Pagination({ pagination, onPageChange }) {
       </div>
     </div>
   );
-}
+};
 
 export default Pagination;

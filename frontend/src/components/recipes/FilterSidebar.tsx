@@ -1,19 +1,24 @@
-import { useDispatch, useSelector } from 'react-redux';
+import React, { ChangeEvent } from 'react';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setFilters, clearFilters, selectBrowseFilters } from '../../redux/slices/recipeSlice';
 import './FilterSidebar.css';
 
-function FilterSidebar({ onFilterChange }) {
-  const dispatch = useDispatch();
-  const filters = useSelector(selectBrowseFilters);
+interface FilterSidebarProps {
+  onFilterChange?: (filters: any) => void;
+}
 
-  const handleFilterChange = (filterName, value) => {
+const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange }) => {
+  const dispatch = useAppDispatch();
+  const filters = useAppSelector(selectBrowseFilters);
+
+  const handleFilterChange = (filterName: string, value: string): void => {
     dispatch(setFilters({ [filterName]: value }));
     if (onFilterChange) {
       onFilterChange({ ...filters, [filterName]: value });
     }
   };
 
-  const handleClearFilters = () => {
+  const handleClearFilters = (): void => {
     dispatch(clearFilters());
     if (onFilterChange) {
       onFilterChange({ category: '', difficulty: '', minRating: '', search: '', sortBy: 'newest', source: 'all' });
@@ -39,7 +44,7 @@ function FilterSidebar({ onFilterChange }) {
         <select
           id="source-filter"
           value={filters.source || 'all'}
-          onChange={(e) => handleFilterChange('source', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLSelectElement>) => handleFilterChange('source', e.target.value)}
         >
           <option value="all">All Recipes</option>
           <option value="following">Following</option>
@@ -52,7 +57,7 @@ function FilterSidebar({ onFilterChange }) {
         <select
           id="category-filter"
           value={filters.category}
-          onChange={(e) => handleFilterChange('category', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLSelectElement>) => handleFilterChange('category', e.target.value)}
         >
           <option value="">All Categories</option>
           <option value="breakfast">Breakfast</option>
@@ -68,7 +73,7 @@ function FilterSidebar({ onFilterChange }) {
         <select
           id="difficulty-filter"
           value={filters.difficulty}
-          onChange={(e) => handleFilterChange('difficulty', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLSelectElement>) => handleFilterChange('difficulty', e.target.value)}
         >
           <option value="">All Levels</option>
           <option value="easy">Easy</option>
@@ -83,7 +88,7 @@ function FilterSidebar({ onFilterChange }) {
         <select
           id="rating-filter"
           value={filters.minRating}
-          onChange={(e) => handleFilterChange('minRating', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLSelectElement>) => handleFilterChange('minRating', e.target.value)}
         >
           <option value="">Any Rating</option>
           <option value="4">4+ Stars</option>
@@ -99,7 +104,7 @@ function FilterSidebar({ onFilterChange }) {
         <select
           id="sort-filter"
           value={filters.sortBy}
-          onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLSelectElement>) => handleFilterChange('sortBy', e.target.value)}
         >
           <option value="newest">Newest</option>
           <option value="rating">Highest Rated</option>
@@ -108,6 +113,6 @@ function FilterSidebar({ onFilterChange }) {
       </div>
     </aside>
   );
-}
+};
 
 export default FilterSidebar;

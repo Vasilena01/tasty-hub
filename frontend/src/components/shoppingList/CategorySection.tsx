@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import ShoppingListItem from './ShoppingListItem';
+import { ShoppingListItem as ShoppingListItemType } from '../../types/models.types';
 import './CategorySection.css';
 
-const CategorySection = ({ category, items }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+interface CategorySectionProps {
+  category: string;
+  items: ShoppingListItemType[];
+}
 
-  const toggleExpanded = () => {
+const CategorySection: React.FC<CategorySectionProps> = ({ category, items }) => {
+  const [isExpanded, setIsExpanded] = useState<boolean>(true);
+
+  const toggleExpanded = (): void => {
     setIsExpanded(!isExpanded);
   };
 
   // Get category emoji
-  const getCategoryEmoji = (category) => {
-    const emojiMap = {
+  const getCategoryEmoji = (category: string): string => {
+    const emojiMap: Record<string, string> = {
       'Vegetables': '🥬',
       'Proteins': '🍖',
       'Dairy': '🥛',

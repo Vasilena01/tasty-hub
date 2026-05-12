@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState, ChangeEvent } from 'react';
+import { useAppDispatch } from '../../redux/hooks';
 import { toggleItemChecked, updateItem, deleteItem } from '../../redux/slices/shoppingListSlice';
+import { ShoppingListItem as ShoppingListItemType } from '../../types/models.types';
 import './ShoppingListItem.css';
 
-const ShoppingListItem = ({ item }) => {
-  const dispatch = useDispatch();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState(item.ingredient_name);
-  const [editedQuantity, setEditedQuantity] = useState(item.quantity);
-  const [editedUnit, setEditedUnit] = useState(item.unit);
+interface ShoppingListItemProps {
+  item: ShoppingListItemType;
+}
 
-  const handleToggle = () => {
+const ShoppingListItem: React.FC<ShoppingListItemProps> = ({ item }) => {
+  const dispatch = useAppDispatch();
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editedName, setEditedName] = useState<string>(item.ingredient_name);
+  const [editedQuantity, setEditedQuantity] = useState<number>(item.quantity);
+  const [editedUnit, setEditedUnit] = useState<string>(item.unit);
+
+  const handleToggle = (): void => {
     dispatch(toggleItemChecked(item.id));
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = (): void => {
     dispatch(updateItem({
       itemId: item.id,
       updates: {
@@ -26,14 +31,14 @@ const ShoppingListItem = ({ item }) => {
     setIsEditing(false);
   };
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = (): void => {
     setEditedName(item.ingredient_name);
     setEditedQuantity(item.quantity);
     setEditedUnit(item.unit);
     setIsEditing(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = (): void => {
     if (window.confirm(`Delete ${item.ingredient_name}?`)) {
       dispatch(deleteItem(item.id));
     }
@@ -45,21 +50,21 @@ const ShoppingListItem = ({ item }) => {
         <input
           type="text"
           value={editedName}
-          onChange={(e) => setEditedName(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setEditedName(e.target.value)}
           className="edit-input name-input"
           placeholder="Ingredient name"
         />
         <input
           type="text"
           value={editedQuantity}
-          onChange={(e) => setEditedQuantity(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setEditedQuantity(Number(e.target.value))}
           className="edit-input quantity-input"
           placeholder="Qty"
         />
         <input
           type="text"
           value={editedUnit}
-          onChange={(e) => setEditedUnit(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setEditedUnit(e.target.value)}
           className="edit-input unit-input"
           placeholder="Unit"
         />

@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState, FormEvent, ChangeEvent, MouseEvent } from 'react';
+import { useAppDispatch } from '../../redux/hooks';
 import { addManualItem, closeAddModal } from '../../redux/slices/shoppingListSlice';
 import './AddItemModal.css';
 
-const AddItemModal = ({ currentWeek }) => {
-  const dispatch = useDispatch();
-  const [ingredientName, setIngredientName] = useState('');
-  const [quantity, setQuantity] = useState('');
-  const [unit, setUnit] = useState('');
+interface AddItemModalProps {
+  currentWeek: Date;
+}
 
-  const handleSubmit = (e) => {
+const AddItemModal: React.FC<AddItemModalProps> = ({ currentWeek }) => {
+  const dispatch = useAppDispatch();
+  const [ingredientName, setIngredientName] = useState<string>('');
+  const [quantity, setQuantity] = useState<string>('');
+  const [unit, setUnit] = useState<string>('');
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
     if (!ingredientName.trim() || !quantity.trim()) {
@@ -30,12 +34,18 @@ const AddItemModal = ({ currentWeek }) => {
     setUnit('');
   };
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     dispatch(closeAddModal());
   };
 
+  const handleOverlayClick = (e: MouseEvent<HTMLDivElement>): void => {
+    if (e.target === e.currentTarget) {
+      handleClose();
+    }
+  };
+
   return (
-    <div className="modal-overlay" onClick={handleClose}>
+    <div className="modal-overlay" onClick={handleOverlayClick}>
       <div className="modal-content add-item-modal" onClick={(e) => e.stopPropagation()}>
         <h3>Add Manual Item</h3>
         <p>Add an item that's not in your meal plan</p>
@@ -47,7 +57,7 @@ const AddItemModal = ({ currentWeek }) => {
               type="text"
               id="ingredient-name"
               value={ingredientName}
-              onChange={(e) => setIngredientName(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setIngredientName(e.target.value)}
               placeholder="e.g., Bananas"
               required
             />
@@ -60,7 +70,7 @@ const AddItemModal = ({ currentWeek }) => {
                 type="text"
                 id="quantity"
                 value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setQuantity(e.target.value)}
                 placeholder="e.g., 6"
                 required
               />
@@ -72,7 +82,7 @@ const AddItemModal = ({ currentWeek }) => {
                 type="text"
                 id="unit"
                 value={unit}
-                onChange={(e) => setUnit(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setUnit(e.target.value)}
                 placeholder="e.g., pieces"
               />
             </div>

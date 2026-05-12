@@ -1,12 +1,17 @@
-import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect, MouseEvent } from 'react';
+import { useAppSelector } from '../redux/hooks';
 import followerService from '../services/followerService';
 import './FollowButton.css';
 
-const FollowButton = ({ userId, onFollowChange }) => {
-  const { user, token } = useSelector((state) => state.auth);
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [loading, setLoading] = useState(false);
+interface FollowButtonProps {
+  userId: number;
+  onFollowChange?: () => void;
+}
+
+const FollowButton: React.FC<FollowButtonProps> = ({ userId, onFollowChange }) => {
+  const { user, token } = useAppSelector((state) => state.auth);
+  const [isFollowing, setIsFollowing] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (user && token && userId !== user.id) {
@@ -14,16 +19,18 @@ const FollowButton = ({ userId, onFollowChange }) => {
     }
   }, [userId, user, token]);
 
-  const checkFollowStatus = async () => {
+  const checkFollowStatus = async (): Promise<void> => {
     try {
-      const response = await followerService.checkFollowStatus(userId, token);
+      const response = await followerService.checkFollowStatus(userId, token!);
       setIsFollowing(response.isFollowing);
     } catch (error) {
       console.error('Error checking follow status:', error);
     }
   };
 
-  const handleFollow = async () => {
+  const handleFollow = async (e: MouseEvent<HTMLButtonElement>): Promise<void> => {
+    e.preventDefault();
+
     if (!token) {
       alert('Please login to follow users');
       return;
@@ -41,7 +48,7 @@ const FollowButton = ({ userId, onFollowChange }) => {
       if (onFollowChange) {
         onFollowChange();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error toggling follow:', error);
       alert(error.response?.data?.error || 'Failed to update follow status');
     } finally {

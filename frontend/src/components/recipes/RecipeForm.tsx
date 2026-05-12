@@ -1,9 +1,50 @@
-import { useForm, useFieldArray } from 'react-hook-form';
+import React from 'react';
+import { useForm, useFieldArray, FieldError } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import ImageUpload from './ImageUpload';
 import IngredientList from './IngredientList';
 import './RecipeForm.css';
+
+// Ingredient type for form
+interface IngredientFormData {
+  name: string;
+  quantity: string;
+  unit: string;
+}
+
+// Recipe form data type
+interface RecipeFormData {
+  title: string;
+  description: string;
+  category: string;
+  difficulty: string;
+  cooking_time: number | string;
+  servings: number | string;
+  instructions: string;
+  ingredients: IngredientFormData[];
+  image: FileList | null;
+}
+
+// Initial data type for editing
+interface RecipeInitialData {
+  title?: string;
+  description?: string;
+  category?: string;
+  difficulty?: string;
+  cooking_time?: number | string;
+  servings?: number | string;
+  instructions?: string;
+  ingredients?: IngredientFormData[];
+  image_url?: string;
+}
+
+interface RecipeFormProps {
+  onSubmit: (formData: FormData) => Promise<void>;
+  initialData?: RecipeInitialData | null;
+  isEditing?: boolean;
+  loading?: boolean;
+}
 
 // Validation schema
 const recipeSchema = yup.object().shape({
@@ -51,7 +92,7 @@ const recipeSchema = yup.object().shape({
       })
     )
     .min(1, 'At least one ingredient is required'),
-  image: yup.mixed().test('required', 'Recipe image is required', function(value) {
+  image: yup.mixed().test('required', 'Recipe image is required', function(value: any) {
     // Allow if editing with existing image
     if (this.options.context?.hasExistingImage) return true;
     // Check if file is selected
@@ -59,8 +100,13 @@ const recipeSchema = yup.object().shape({
   })
 });
 
-function RecipeForm({ onSubmit, initialData = null, isEditing = false, loading = false }) {
-  const defaultValues = initialData || {
+const RecipeForm: React.FC<RecipeFormProps> = ({
+  onSubmit,
+  initialData = null,
+  isEditing = false,
+  loading = false
+}) => {
+  const defaultValues: RecipeFormData = initialData || {
     title: '',
     description: '',
     category: '',
@@ -77,7 +123,7 @@ function RecipeForm({ onSubmit, initialData = null, isEditing = false, loading =
     control,
     handleSubmit,
     formState: { errors }
-  } = useForm({
+  } = useForm<RecipeFormData>({
     resolver: yupResolver(recipeSchema),
     defaultValues,
     context: { hasExistingImage: !!initialData?.image_url }
@@ -89,7 +135,7 @@ function RecipeForm({ onSubmit, initialData = null, isEditing = false, loading =
     name: 'ingredients'
   });
 
-  const handleFormSubmit = async (data) => {
+  const handleFormSubmit = async (data: RecipeFormData): Promise<void> => {
     const formData = new FormData();
 
     // Append all text fields
@@ -97,8 +143,8 @@ function RecipeForm({ onSubmit, initialData = null, isEditing = false, loading =
     formData.append('description', data.description);
     formData.append('category', data.category);
     formData.append('difficulty', data.difficulty);
-    formData.append('cooking_time', data.cooking_time);
-    formData.append('servings', data.servings);
+    formData.append('cooking_time', data.cooking_time.toString());
+    formData.append('servings', data.servings.toString());
     formData.append('instructions', data.instructions);
 
     // Append ingredients as JSON string
@@ -135,7 +181,7 @@ function RecipeForm({ onSubmit, initialData = null, isEditing = false, loading =
           <textarea
             id="description"
             placeholder="Describe your recipe..."
-            rows="3"
+            rows={3}
             {...register('description')}
             className={errors.description ? 'input-error' : ''}
           />
@@ -209,7 +255,7 @@ function RecipeForm({ onSubmit, initialData = null, isEditing = false, loading =
         <h3 className="section-title">Recipe Image</h3>
         <ImageUpload
           register={register}
-          error={errors.image}
+          error={errors.image as FieldError | undefined}
           existingImage={initialData?.image_url}
         />
       </section>
@@ -234,7 +280,7 @@ function RecipeForm({ onSubmit, initialData = null, isEditing = false, loading =
           <textarea
             id="instructions"
             placeholder="1. Preheat oven to 350F...&#10;2. Mix dry ingredients...&#10;3. ..."
-            rows="8"
+            rows={8}
             {...register('instructions')}
             className={errors.instructions ? 'input-error' : ''}
           />
@@ -255,6 +301,6 @@ function RecipeForm({ onSubmit, initialData = null, isEditing = false, loading =
       </div>
     </form>
   );
-}
+};
 
 export default RecipeForm;

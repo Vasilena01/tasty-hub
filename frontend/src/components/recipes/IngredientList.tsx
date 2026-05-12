@@ -1,7 +1,35 @@
+import React from 'react';
+import { UseFormRegister, FieldErrors, UseFieldArrayRemove, UseFieldArrayAppend } from 'react-hook-form';
 import './IngredientList.css';
 
-function IngredientList({ fields, register, remove, append, errors }) {
-  const handleAddIngredient = () => {
+interface IngredientField {
+  id: string;
+  name: string;
+  quantity: string;
+  unit: string;
+}
+
+interface RecipeFormData {
+  ingredients: IngredientField[];
+  [key: string]: any;
+}
+
+interface IngredientListProps {
+  fields: IngredientField[];
+  register: UseFormRegister<any>;
+  remove: UseFieldArrayRemove;
+  append: UseFieldArrayAppend<any>;
+  errors: FieldErrors<RecipeFormData>;
+}
+
+const IngredientList: React.FC<IngredientListProps> = ({
+  fields,
+  register,
+  remove,
+  append,
+  errors
+}) => {
+  const handleAddIngredient = (): void => {
     append({ name: '', quantity: '', unit: '' });
   };
 
@@ -20,7 +48,7 @@ function IngredientList({ fields, register, remove, append, errors }) {
                 className={errors?.ingredients?.[index]?.name ? 'input-error' : ''}
               />
               {errors?.ingredients?.[index]?.name && (
-                <span className="field-error">{errors.ingredients[index].name.message}</span>
+                <span className="field-error">{errors.ingredients[index]?.name?.message}</span>
               )}
             </div>
 
@@ -32,7 +60,7 @@ function IngredientList({ fields, register, remove, append, errors }) {
                 className={errors?.ingredients?.[index]?.quantity ? 'input-error' : ''}
               />
               {errors?.ingredients?.[index]?.quantity && (
-                <span className="field-error">{errors.ingredients[index].quantity.message}</span>
+                <span className="field-error">{errors.ingredients[index]?.quantity?.message}</span>
               )}
             </div>
 
@@ -44,7 +72,7 @@ function IngredientList({ fields, register, remove, append, errors }) {
                 className={errors?.ingredients?.[index]?.unit ? 'input-error' : ''}
               />
               {errors?.ingredients?.[index]?.unit && (
-                <span className="field-error">{errors.ingredients[index].unit.message}</span>
+                <span className="field-error">{errors.ingredients[index]?.unit?.message}</span>
               )}
             </div>
           </div>
@@ -62,7 +90,7 @@ function IngredientList({ fields, register, remove, append, errors }) {
         </div>
       ))}
 
-      {errors?.ingredients?.message && (
+      {errors?.ingredients?.message && typeof errors.ingredients.message === 'string' && (
         <span className="list-error">{errors.ingredients.message}</span>
       )}
 
@@ -75,6 +103,6 @@ function IngredientList({ fields, register, remove, append, errors }) {
       </button>
     </div>
   );
-}
+};
 
 export default IngredientList;

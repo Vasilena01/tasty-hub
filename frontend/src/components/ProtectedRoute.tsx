@@ -1,8 +1,9 @@
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../redux/hooks';
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useSelector((state) => state.auth);
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
   const location = useLocation();
 
   if (!isAuthenticated) {
@@ -10,7 +11,7 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return children;
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

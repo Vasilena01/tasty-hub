@@ -1,18 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, useEffect, MouseEvent, ChangeEvent } from 'react';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { closeRecipeModal, addRecipeToSlot, updateMealPlan } from '../../redux/slices/mealPlanSlice';
 import { fetchMyRecipes } from '../../redux/slices/recipeSlice';
 import { fetchSavedRecipes } from '../../redux/slices/savedRecipesSlice';
+import { Recipe } from '../../types/models.types';
 import './RecipeSelectionModal.css';
 
-const RecipeSelectionModal = ({ isOpen, selectedSlot, currentWeek }) => {
-  const dispatch = useDispatch();
-  const [activeTab, setActiveTab] = useState('my-recipes');
-  const [searchQuery, setSearchQuery] = useState('');
+interface SelectedSlot {
+  day_of_week: number;
+  meal_type: string;
+}
 
-  const myRecipes = useSelector(state => state.recipes.myRecipeIds?.map(id => state.recipes.entities[id]) || []);
-  const savedRecipes = useSelector(state => state.savedRecipes.savedRecipes || []);
-  const mealPlans = useSelector(state => state.mealPlan.mealPlans);
+interface RecipeSelectionModalProps {
+  isOpen: boolean;
+  selectedSlot: SelectedSlot | null;
+  currentWeek: Date;
+}
+
+const RecipeSelectionModal: React.FC<RecipeSelectionModalProps> = ({
+  isOpen,
+  selectedSlot,
+  currentWeek
+}) => {
+  const dispatch = useAppDispatch();
+  const [activeTab, setActiveTab] = useState<'my-recipes' | 'saved-recipes'>('my-recipes');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const myRecipes = useAppSelector(state =>
+    state.recipes.myRecipeIds?.map(id => state.recipes.entities[id]).filter(Boolean) as Recipe[] || []
+  );
+  const savedRecipes = useAppSelector(state => state.savedRecipes.savedRecipes || []);
+  const mealPlans = useAppSelector(state => state.mealPlan.mealPlans);
 
   useEffect(() => {
     if (isOpen) {
@@ -36,7 +54,7 @@ const RecipeSelectionModal = ({ isOpen, selectedSlot, currentWeek }) => {
     mp => mp.day_of_week === selectedSlot.day_of_week && mp.meal_type === selectedSlot.meal_type
   );
 
-  const handleSelectRecipe = (recipeId) => {
+  const handleSelectRecipe = (recipeId: number): void => {
     if (existingMealPlan) {
       // Update existing entry
       dispatch(updateMealPlan({ id: existingMealPlan.id, recipeId }));
@@ -51,13 +69,19 @@ const RecipeSelectionModal = ({ isOpen, selectedSlot, currentWeek }) => {
     }
   };
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     dispatch(closeRecipeModal());
     setSearchQuery('');
   };
 
+  const handleOverlayClick = (e: MouseEvent<HTMLDivElement>): void => {
+    if (e.target === e.currentTarget) {
+      handleClose();
+    }
+  };
+
   return (
-    <div className="modal-overlay" onClick={handleClose}>
+    <div className="modal-overlay" onClick={handleOverlayClick}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Select Recipe</h2>
@@ -70,7 +94,7 @@ const RecipeSelectionModal = ({ isOpen, selectedSlot, currentWeek }) => {
             type="text"
             placeholder="Search recipes..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
             className="modal-search-input"
           />
         </div>

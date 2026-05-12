@@ -1,16 +1,38 @@
+import React, { useState, MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { saveRecipe, unsaveRecipe } from '../../redux/slices/savedRecipesSlice';
+import { Recipe } from '../../types/models.types';
 import './RecipeCard.css';
 
-function RecipeCard({ recipe, showIngredients = false, showSaveButton = false }) {
-  const [showOverlay, setShowOverlay] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+interface RecipeCardProps {
+  recipe: Recipe & {
+    first_name?: string;
+    last_name?: string;
+    total_ratings?: number;
+    matched_ingredients?: string[];
+    match_count?: number;
+    ingredients?: Array<{
+      name: string;
+      quantity: number;
+      unit: string;
+    }>;
+  };
+  showIngredients?: boolean;
+  showSaveButton?: boolean;
+}
 
-  const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector((state) => state.auth);
-  const { savedRecipeIds } = useSelector((state) => state.savedRecipes);
+const RecipeCard: React.FC<RecipeCardProps> = ({
+  recipe,
+  showIngredients = false,
+  showSaveButton = false
+}) => {
+  const [showOverlay, setShowOverlay] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+
+  const dispatch = useAppDispatch();
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { savedRecipeIds } = useAppSelector((state) => state.savedRecipes);
 
   const isSaved = savedRecipeIds.includes(recipe.id);
 
@@ -20,10 +42,10 @@ function RecipeCard({ recipe, showIngredients = false, showSaveButton = false })
     : '/placeholder-recipe.jpg';
 
   // Format rating display
-  const rating = recipe.average_rating ? parseFloat(recipe.average_rating).toFixed(1) : '0.0';
+  const rating = recipe.average_rating ? parseFloat(recipe.average_rating.toString()).toFixed(1) : '0.0';
 
   // Check if an ingredient is matched
-  const isMatched = (ingredientName) => {
+  const isMatched = (ingredientName: string): boolean => {
     if (!recipe.matched_ingredients || !Array.isArray(recipe.matched_ingredients)) {
       return false;
     }
@@ -34,7 +56,7 @@ function RecipeCard({ recipe, showIngredients = false, showSaveButton = false })
   };
 
   // Handle save/unsave toggle
-  const handleSaveToggle = async (e) => {
+  const handleSaveToggle = async (e: MouseEvent<HTMLButtonElement>): Promise<void> => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -68,7 +90,7 @@ function RecipeCard({ recipe, showIngredients = false, showSaveButton = false })
             src={imageUrl}
             alt={recipe.title}
             onError={(e) => {
-              e.target.src = '/placeholder-recipe.jpg';
+              (e.target as HTMLImageElement).src = '/placeholder-recipe.jpg';
             }}
           />
           <span className={`recipe-badge difficulty-${recipe.difficulty}`}>
@@ -135,6 +157,6 @@ function RecipeCard({ recipe, showIngredients = false, showSaveButton = false })
       )}
     </div>
   );
-}
+};
 
 export default RecipeCard;

@@ -1,30 +1,41 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '../../redux/hooks';
 import { openRecipeModal, deleteMealPlan } from '../../redux/slices/mealPlanSlice';
 import { getWeekDates, getDayName } from '../../utils/dateUtils';
+import { MealPlan } from '../../types/models.types';
 import './MealPlanCalendar.css';
 
-const MEAL_TYPES = ['breakfast', 'lunch', 'dinner'];
-const MEAL_LABELS = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' };
+const MEAL_TYPES = ['breakfast', 'lunch', 'dinner'] as const;
+const MEAL_LABELS: Record<string, string> = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' };
 
-const MealPlanCalendar = ({ mealPlans, weekStartDate }) => {
-  const dispatch = useDispatch();
+interface MealPlanWithRecipe extends MealPlan {
+  title?: string;
+  image_url?: string;
+}
+
+interface MealPlanCalendarProps {
+  mealPlans: MealPlanWithRecipe[];
+  weekStartDate: Date;
+}
+
+const MealPlanCalendar: React.FC<MealPlanCalendarProps> = ({ mealPlans, weekStartDate }) => {
+  const dispatch = useAppDispatch();
   const weekDates = getWeekDates(weekStartDate);
 
   // Helper: Find meal plan entry for specific day/meal
-  const getMealPlan = (dayOfWeek, mealType) => {
+  const getMealPlan = (dayOfWeek: number, mealType: string): MealPlanWithRecipe | undefined => {
     return mealPlans.find(
       mp => mp.day_of_week === dayOfWeek && mp.meal_type === mealType
     );
   };
 
   // Handler: Open recipe selection modal
-  const handleAddRecipe = (dayOfWeek, mealType) => {
+  const handleAddRecipe = (dayOfWeek: number, mealType: string): void => {
     dispatch(openRecipeModal({ day_of_week: dayOfWeek, meal_type: mealType }));
   };
 
   // Handler: Remove recipe from slot
-  const handleRemoveRecipe = (mealPlanId) => {
+  const handleRemoveRecipe = (mealPlanId: number): void => {
     if (window.confirm('Remove this recipe from your meal plan?')) {
       dispatch(deleteMealPlan(mealPlanId));
     }
