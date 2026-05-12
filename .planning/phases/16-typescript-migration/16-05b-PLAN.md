@@ -10,7 +10,7 @@ files_modified:
   - frontend/src/utils/*.ts
   - frontend/src/config/*.ts
 autonomous: true
-requirements: [NFR-5, NFR-6]
+requirements: [NFR-6]
 
 must_haves:
   truths:

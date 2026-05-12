@@ -9,7 +9,7 @@ files_modified:
   - frontend/src/App.tsx
   - frontend/src/pages/*.tsx
 autonomous: true
-requirements: [NFR-5, NFR-6]
+requirements: [NFR-6]
 
 must_haves:
   truths:
