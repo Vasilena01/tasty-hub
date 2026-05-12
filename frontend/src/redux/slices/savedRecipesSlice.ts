@@ -1,7 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { SavedRecipe } from '../../types/models.types';
 import savedRecipesService from '../../services/savedRecipesService';
 
-const initialState = {
+// State interface
+interface SavedRecipesState {
+  savedRecipes: SavedRecipe[];
+  savedRecipeIds: number[];
+  loading: boolean;
+  error: string | null;
+}
+
+const initialState: SavedRecipesState = {
   savedRecipes: [],
   savedRecipeIds: [],
   loading: false,
@@ -9,52 +18,68 @@ const initialState = {
 };
 
 // Fetch all saved recipes for the current user
-export const fetchSavedRecipes = createAsyncThunk(
+export const fetchSavedRecipes = createAsyncThunk<
+  SavedRecipe[],
+  void,
+  { rejectValue: string }
+>(
   'savedRecipes/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
       const response = await savedRecipesService.fetchSavedRecipes();
       return response.data.recipes; // Backend returns data.recipes
-    } catch (error) {
+    } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch saved recipes');
     }
   }
 );
 
 // Save a recipe
-export const saveRecipe = createAsyncThunk(
+export const saveRecipe = createAsyncThunk<
+  SavedRecipe,
+  number,
+  { rejectValue: string }
+>(
   'savedRecipes/save',
   async (recipeId, { rejectWithValue }) => {
     try {
       const response = await savedRecipesService.saveRecipe(recipeId);
       return response.data; // Backend returns data (the saved recipe object)
-    } catch (error) {
+    } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to save recipe');
     }
   }
 );
 
 // Unsave a recipe
-export const unsaveRecipe = createAsyncThunk(
+export const unsaveRecipe = createAsyncThunk<
+  number,
+  number,
+  { rejectValue: string }
+>(
   'savedRecipes/unsave',
   async (recipeId, { rejectWithValue }) => {
     try {
       await savedRecipesService.unsaveRecipe(recipeId);
       return recipeId;
-    } catch (error) {
+    } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to unsave recipe');
     }
   }
 );
 
 // Check if a recipe is saved
-export const checkIfSaved = createAsyncThunk(
+export const checkIfSaved = createAsyncThunk<
+  { recipeId: number; isSaved: boolean },
+  number,
+  { rejectValue: string }
+>(
   'savedRecipes/check',
   async (recipeId, { rejectWithValue }) => {
     try {
       const response = await savedRecipesService.checkIfSaved(recipeId);
       return { recipeId, isSaved: response.data.isSaved }; // Backend returns data.isSaved
-    } catch (error) {
+    } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to check saved status');
     }
   }
@@ -87,7 +112,7 @@ const savedRecipesSlice = createSlice({
       })
       .addCase(fetchSavedRecipes.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || 'Failed to fetch saved recipes';
       })
       // Save recipe
       .addCase(saveRecipe.pending, (state) => {
@@ -100,7 +125,7 @@ const savedRecipesSlice = createSlice({
         }
       })
       .addCase(saveRecipe.rejected, (state, action) => {
-        state.error = action.payload;
+        state.error = action.payload || 'Failed to save recipe';
       })
       // Unsave recipe
       .addCase(unsaveRecipe.pending, (state) => {
@@ -112,7 +137,7 @@ const savedRecipesSlice = createSlice({
         state.savedRecipeIds = state.savedRecipeIds.filter(id => id !== recipeId);
       })
       .addCase(unsaveRecipe.rejected, (state, action) => {
-        state.error = action.payload;
+        state.error = action.payload || 'Failed to unsave recipe';
       })
       // Check if saved
       .addCase(checkIfSaved.fulfilled, (state, action) => {

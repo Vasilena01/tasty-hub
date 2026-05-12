@@ -1,11 +1,23 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { User } from '../../types/models.types';
+import { LoginRequest, RegisterRequest, AuthResponse } from '../../types/api.types';
 import authService from '../../services/authService';
+
+// State interface
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+  error: string | null;
+}
 
 // Load from localStorage on init (D-31)
 const token = localStorage.getItem('token');
 const user = JSON.parse(localStorage.getItem('user') || 'null');
 
-const initialState = {
+// Initial state with proper types
+const initialState: AuthState = {
   user: user,
   token: token,
   isAuthenticated: !!token,
@@ -14,16 +26,20 @@ const initialState = {
 };
 
 // Register async thunk
-export const register = createAsyncThunk(
+export const register = createAsyncThunk<
+  AuthResponse,
+  RegisterRequest,
+  { rejectValue: string }
+>(
   'auth/register',
   async (userData, { rejectWithValue }) => {
     try {
       const response = await authService.register(userData);
       if (!response.success) {
-        return rejectWithValue(response.error);
+        return rejectWithValue(response.error || 'Registration failed');
       }
       return response;
-    } catch (error) {
+    } catch (error: any) {
       // Network error (D-34)
       const message = error.response?.data?.error || 'Unable to connect to server';
       return rejectWithValue(message);
@@ -32,16 +48,20 @@ export const register = createAsyncThunk(
 );
 
 // Login async thunk
-export const login = createAsyncThunk(
+export const login = createAsyncThunk<
+  AuthResponse,
+  LoginRequest,
+  { rejectValue: string }
+>(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await authService.login(credentials);
       if (!response.success) {
-        return rejectWithValue(response.error);
+        return rejectWithValue(response.error || 'Login failed');
       }
       return response;
-    } catch (error) {
+    } catch (error: any) {
       // Network error (D-34)
       const message = error.response?.data?.error || 'Unable to connect to server';
       return rejectWithValue(message);
@@ -64,9 +84,11 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    updateUser: (state, action) => {
-      state.user = { ...state.user, ...action.payload };
-      localStorage.setItem('user', JSON.stringify(state.user));
+    updateUser: (state, action: PayloadAction<Partial<User>>) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+        localStorage.setItem('user', JSON.stringify(state.user));
+      }
     }
   },
   extraReducers: (builder) => {
@@ -87,7 +109,7 @@ const authSlice = createSlice({
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || 'Registration failed';
       })
       // Login cases
       .addCase(login.pending, (state) => {
@@ -104,7 +126,7 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || 'Login failed';
       });
   }
 });

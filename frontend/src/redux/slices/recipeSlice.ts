@@ -1,105 +1,162 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { Recipe } from '../../types/models.types';
+import { PaginatedResponse, RecipeQueryParams } from '../../types/api.types';
 import recipeService from '../../services/recipeService';
 
+// State interface
+interface RecipeState {
+  entities: { [id: number]: Recipe };
+  browseList: number[];
+  browsePagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  browseFilters: RecipeQueryParams & {
+    ingredientSearch: string;
+    source: string;
+  };
+  currentRecipeId: number | null;
+  myRecipeIds: number[];
+  loading: boolean;
+  error: string | null;
+  createSuccess: boolean;
+  updateSuccess: boolean;
+  deleteSuccess: boolean;
+}
+
 // Async Thunks
-export const fetchRecipes = createAsyncThunk(
+export const fetchRecipes = createAsyncThunk<
+  PaginatedResponse<Recipe>,
+  RecipeQueryParams,
+  { rejectValue: string }
+>(
   'recipes/fetchRecipes',
   async (filters, { rejectWithValue }) => {
     try {
       const data = await recipeService.getAllRecipes(filters);
       return data;
-    } catch (error) {
+    } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch recipes');
     }
   }
 );
 
-export const fetchRecipeById = createAsyncThunk(
+export const fetchRecipeById = createAsyncThunk<
+  Recipe,
+  number,
+  { rejectValue: string }
+>(
   'recipes/fetchRecipeById',
   async (id, { rejectWithValue }) => {
     try {
       const data = await recipeService.getRecipeById(id);
       return data.recipe;
-    } catch (error) {
+    } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch recipe');
     }
   }
 );
 
-export const createRecipe = createAsyncThunk(
+export const createRecipe = createAsyncThunk<
+  Recipe,
+  FormData,
+  { rejectValue: string }
+>(
   'recipes/createRecipe',
   async (formData, { rejectWithValue }) => {
     try {
       const data = await recipeService.createRecipe(formData);
       return data.recipe;
-    } catch (error) {
+    } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to create recipe');
     }
   }
 );
 
-export const updateRecipe = createAsyncThunk(
+export const updateRecipe = createAsyncThunk<
+  Recipe,
+  { id: number; formData: FormData },
+  { rejectValue: string }
+>(
   'recipes/updateRecipe',
   async ({ id, formData }, { rejectWithValue }) => {
     try {
       const data = await recipeService.updateRecipe(id, formData);
       return data.recipe;
-    } catch (error) {
+    } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to update recipe');
     }
   }
 );
 
-export const deleteRecipe = createAsyncThunk(
+export const deleteRecipe = createAsyncThunk<
+  number,
+  number,
+  { rejectValue: string }
+>(
   'recipes/deleteRecipe',
   async (id, { rejectWithValue }) => {
     try {
       await recipeService.deleteRecipe(id);
       return id;
-    } catch (error) {
+    } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to delete recipe');
     }
   }
 );
 
-export const fetchMyRecipes = createAsyncThunk(
+export const fetchMyRecipes = createAsyncThunk<
+  Recipe[],
+  void,
+  { rejectValue: string }
+>(
   'recipes/fetchMyRecipes',
   async (_, { rejectWithValue }) => {
     try {
       const data = await recipeService.getMyRecipes();
       return data.recipes;
-    } catch (error) {
+    } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch your recipes');
     }
   }
 );
 
-export const searchRecipesByIngredients = createAsyncThunk(
+export const searchRecipesByIngredients = createAsyncThunk<
+  PaginatedResponse<Recipe>,
+  RecipeQueryParams,
+  { rejectValue: string }
+>(
   'recipes/searchByIngredients',
   async (filters, { rejectWithValue }) => {
     try {
       const data = await recipeService.searchByIngredients(filters);
       return data;
-    } catch (error) {
+    } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to search recipes by ingredients');
     }
   }
 );
 
-export const fetchFollowingRecipes = createAsyncThunk(
+export const fetchFollowingRecipes = createAsyncThunk<
+  PaginatedResponse<Recipe>,
+  RecipeQueryParams,
+  { rejectValue: string }
+>(
   'recipes/fetchFollowingRecipes',
   async (filters, { rejectWithValue }) => {
     try {
       const data = await recipeService.getFollowingRecipes(filters);
       return data;
-    } catch (error) {
+    } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch following recipes');
     }
   }
 );
 
 // Initial State
-const initialState = {
+const initialState: RecipeState = {
   // Normalized entities
   entities: {},  // { [id]: recipe }
 
@@ -114,7 +171,7 @@ const initialState = {
   browseFilters: {
     category: '',
     difficulty: '',
-    minRating: '',
+    minRating: undefined,
     search: '',
     ingredientSearch: '',
     sortBy: 'newest',
@@ -140,14 +197,14 @@ const recipeSlice = createSlice({
   name: 'recipes',
   initialState,
   reducers: {
-    setFilters: (state, action) => {
+    setFilters: (state, action: PayloadAction<Partial<RecipeState['browseFilters']>>) => {
       state.browseFilters = { ...state.browseFilters, ...action.payload };
     },
     clearFilters: (state) => {
       state.browseFilters = {
         category: '',
         difficulty: '',
-        minRating: '',
+        minRating: undefined,
         search: '',
         ingredientSearch: '',
         sortBy: 'newest',
@@ -162,7 +219,7 @@ const recipeSlice = createSlice({
       state.updateSuccess = false;
       state.deleteSuccess = false;
     },
-    setCurrentRecipe: (state, action) => {
+    setCurrentRecipe: (state, action: PayloadAction<number>) => {
       state.currentRecipeId = action.payload;
     }
   },
@@ -185,7 +242,7 @@ const recipeSlice = createSlice({
       })
       .addCase(fetchRecipes.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || 'Failed to fetch recipes';
       })
 
       // Fetch single recipe
@@ -317,21 +374,21 @@ const recipeSlice = createSlice({
 export const { setFilters, clearFilters, clearError, clearSuccess, setCurrentRecipe } = recipeSlice.actions;
 
 // Selectors
-export const selectAllRecipes = (state) =>
-  state.recipes.browseList.map(id => state.recipes.entities[id]).filter(Boolean);
+export const selectAllRecipes = (state: any) =>
+  state.recipes.browseList.map((id: number) => state.recipes.entities[id]).filter(Boolean);
 
-export const selectRecipeById = (id) => (state) =>
+export const selectRecipeById = (id: number) => (state: any) =>
   state.recipes.entities[id];
 
-export const selectCurrentRecipe = (state) =>
+export const selectCurrentRecipe = (state: any) =>
   state.recipes.entities[state.recipes.currentRecipeId];
 
-export const selectMyRecipes = (state) =>
-  state.recipes.myRecipeIds.map(id => state.recipes.entities[id]).filter(Boolean);
+export const selectMyRecipes = (state: any) =>
+  state.recipes.myRecipeIds.map((id: number) => state.recipes.entities[id]).filter(Boolean);
 
-export const selectRecipeLoading = (state) => state.recipes.loading;
-export const selectRecipeError = (state) => state.recipes.error;
-export const selectBrowseFilters = (state) => state.recipes.browseFilters;
-export const selectBrowsePagination = (state) => state.recipes.browsePagination;
+export const selectRecipeLoading = (state: any) => state.recipes.loading;
+export const selectRecipeError = (state: any) => state.recipes.error;
+export const selectBrowseFilters = (state: any) => state.recipes.browseFilters;
+export const selectBrowsePagination = (state: any) => state.recipes.browsePagination;
 
 export default recipeSlice.reducer;
