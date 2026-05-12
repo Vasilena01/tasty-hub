@@ -14,7 +14,7 @@ interface SelectedSlot {
 interface RecipeSelectionModalProps {
   isOpen: boolean;
   selectedSlot: SelectedSlot | null;
-  currentWeek: Date;
+  currentWeek: Date | string;
 }
 
 const RecipeSelectionModal: React.FC<RecipeSelectionModalProps> = ({
@@ -27,9 +27,11 @@ const RecipeSelectionModal: React.FC<RecipeSelectionModalProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const myRecipes = useAppSelector(state =>
-    state.recipes.myRecipeIds?.map(id => state.recipes.entities[id]).filter(Boolean) as Recipe[] || []
+    state.recipes.myRecipeIds?.map(id => state.recipes.entities[id]).filter((r): r is Recipe => !!r) || []
   );
-  const savedRecipes = useAppSelector(state => state.savedRecipes.savedRecipes || []);
+  const savedRecipes = useAppSelector(state =>
+    (state.savedRecipes.savedRecipes || []).map(sr => sr.recipe).filter((r): r is Recipe => !!r)
+  );
   const mealPlans = useAppSelector(state => state.mealPlan.mealPlans);
 
   useEffect(() => {

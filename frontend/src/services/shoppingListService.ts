@@ -10,7 +10,7 @@ interface ShoppingListItemUpdate {
 
 interface ManualItemData {
   ingredient_name: string;
-  quantity: string;
+  quantity: string | number;
   unit: string;
   week_start_date: Date | string;
 }

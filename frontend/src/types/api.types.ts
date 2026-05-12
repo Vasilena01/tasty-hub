@@ -5,6 +5,14 @@ export interface ApiResponse<T = any> {
   error?: string;
   message?: string;
   token?: string;
+  // Direct field access (some endpoints return data directly)
+  user?: any;
+  recipe?: any;
+  recipes?: any[];
+  counts?: any;
+  followers?: any[];
+  following?: any[];
+  items?: any[];
 }
 
 // Paginated response for recipes

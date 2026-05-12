@@ -34,6 +34,7 @@ export interface RecipeIngredient {
   id: number;
   recipe_id: number;
   ingredient_id: number;
+  name: string; // Alias for ingredient_name
   ingredient_name: string;
   quantity: number;
   unit: string;

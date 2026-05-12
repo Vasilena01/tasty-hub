@@ -19,11 +19,11 @@ interface RecipeFormData {
   description: string;
   category: string;
   difficulty: string;
-  cooking_time: number | string;
-  servings: number | string;
+  cooking_time: number;
+  servings: number;
   instructions: string;
   ingredients: IngredientFormData[];
-  image: FileList | null;
+  image?: FileList;
 }
 
 // Initial data type for editing
@@ -32,11 +32,12 @@ interface RecipeInitialData {
   description?: string;
   category?: string;
   difficulty?: string;
-  cooking_time?: number | string;
-  servings?: number | string;
+  cooking_time?: number;
+  servings?: number;
   instructions?: string;
   ingredients?: IngredientFormData[];
   image_url?: string;
+  image?: never;
 }
 
 interface RecipeFormProps {
@@ -106,16 +107,15 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
   isEditing = false,
   loading = false
 }) => {
-  const defaultValues: RecipeFormData = initialData || {
+  const defaultValues: Partial<RecipeFormData> = initialData || {
     title: '',
     description: '',
     category: '',
     difficulty: '',
-    cooking_time: '',
-    servings: '',
+    cooking_time: 0,
+    servings: 0,
     instructions: '',
-    ingredients: [{ name: '', quantity: '', unit: '' }],
-    image: null
+    ingredients: [{ name: '', quantity: '', unit: '' }]
   };
 
   const {
