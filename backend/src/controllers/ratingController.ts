@@ -17,12 +17,12 @@ interface SubmitRatingRequestBody {
 interface RatingData {
   userRating: IRating;
   averageRating: number | null;
-  ratingCount: string;
+  ratingCount: number;
 }
 
 interface RecipeRatingsData {
   averageRating: number | null;
-  ratingCount: string;
+  ratingCount: number;
   userRating: number | null;
 }
 
@@ -76,8 +76,8 @@ const submitRating = async (
       message: 'Rating submitted successfully',
       data: {
         userRating,
-        averageRating: recipeRatings.averageRating,
-        ratingCount: recipeRatings.ratingCount
+        averageRating: recipeRatings.averageRating ? parseFloat(recipeRatings.averageRating as unknown as string) : null,
+        ratingCount: parseInt(recipeRatings.ratingCount as unknown as string)
       }
     });
   } catch (error) {
@@ -114,8 +114,8 @@ const getRecipeRatings = async (
     res.status(200).json({
       success: true,
       data: {
-        averageRating: recipeRatings.averageRating,
-        ratingCount: recipeRatings.ratingCount,
+        averageRating: recipeRatings.averageRating ? parseFloat(recipeRatings.averageRating as unknown as string) : null,
+        ratingCount: parseInt(recipeRatings.ratingCount as unknown as string),
         userRating: userRating ? userRating.rating : null
       }
     });

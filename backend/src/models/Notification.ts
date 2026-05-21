@@ -1,7 +1,7 @@
 import { Pool, QueryResult } from 'pg';
 import { INotification, INotificationCreateInput, INotificationUpdateInput } from '../types/models.types';
 
-const db: Pool = require('../config/database');
+import db from '../config/database';
 
 interface NotificationQueryOptions {
   limit?: number;

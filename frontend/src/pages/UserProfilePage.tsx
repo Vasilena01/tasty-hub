@@ -32,7 +32,7 @@ const UserProfilePage: React.FC = () => {
     if (!userId) return;
     try {
       const response = await userService.getUserById(parseInt(userId));
-      setProfileUser(response.user);
+      setProfileUser(response.data || null);
     } catch (error) {
       console.error('Error fetching user profile:', error);
     } finally {
@@ -44,9 +44,13 @@ const UserProfilePage: React.FC = () => {
     if (!userId) return;
     try {
       const response = await followerService.getFollowCounts(parseInt(userId));
-      setCounts(response.counts);
+      setCounts({
+        followers_count: response.data?.followerCount || 0,
+        following_count: response.data?.followingCount || 0
+      });
     } catch (error) {
       console.error('Error fetching follow counts:', error);
+      setCounts({ followers_count: 0, following_count: 0 });
     }
   };
 
@@ -54,7 +58,7 @@ const UserProfilePage: React.FC = () => {
     if (!userId) return;
     try {
       const response = await followerService.getFollowers(parseInt(userId));
-      setFollowers(response.followers || []);
+      setFollowers(response.data || []);
     } catch (error) {
       console.error('Error fetching followers:', error);
     }
@@ -64,7 +68,7 @@ const UserProfilePage: React.FC = () => {
     if (!userId) return;
     try {
       const response = await followerService.getFollowing(parseInt(userId));
-      setFollowing(response.following || []);
+      setFollowing(response.data || []);
     } catch (error) {
       console.error('Error fetching following:', error);
     }
@@ -75,7 +79,7 @@ const UserProfilePage: React.FC = () => {
     try {
       setRecipesLoading(true);
       const response = await recipeService.getRecipesByUserId(parseInt(userId));
-      setRecipes(response.recipes || []);
+      setRecipes(response.data || []);
     } catch (error) {
       console.error('Error fetching user recipes:', error);
     } finally {

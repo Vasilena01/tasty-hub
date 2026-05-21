@@ -51,8 +51,11 @@ export const fetchRecipeById = createAsyncThunk<
   'recipes/fetchRecipeById',
   async (id, { rejectWithValue }) => {
     try {
-      const data = await recipeService.getRecipeById(id);
-      return data.recipe;
+      const response = await recipeService.getRecipeById(id);
+      if (!response.data) {
+        return rejectWithValue('Recipe not found');
+      }
+      return response.data as Recipe;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch recipe');
     }
@@ -67,8 +70,11 @@ export const createRecipe = createAsyncThunk<
   'recipes/createRecipe',
   async (formData, { rejectWithValue }) => {
     try {
-      const data = await recipeService.createRecipe(formData);
-      return data.recipe;
+      const response = await recipeService.createRecipe(formData);
+      if (!response.data) {
+        return rejectWithValue('Failed to create recipe');
+      }
+      return response.data as Recipe;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to create recipe');
     }
@@ -83,8 +89,11 @@ export const updateRecipe = createAsyncThunk<
   'recipes/updateRecipe',
   async ({ id, formData }, { rejectWithValue }) => {
     try {
-      const data = await recipeService.updateRecipe(id, formData);
-      return data.recipe;
+      const response = await recipeService.updateRecipe(id, formData);
+      if (!response.data) {
+        return rejectWithValue('Failed to update recipe');
+      }
+      return response.data as Recipe;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to update recipe');
     }
@@ -115,8 +124,8 @@ export const fetchMyRecipes = createAsyncThunk<
   'recipes/fetchMyRecipes',
   async (_, { rejectWithValue }) => {
     try {
-      const data = await recipeService.getMyRecipes();
-      return data.recipes || [];
+      const response = await recipeService.getMyRecipes();
+      return response.data || [];
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch your recipes');
     }

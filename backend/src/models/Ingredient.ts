@@ -1,7 +1,7 @@
 import { Pool, QueryResult } from 'pg';
-import { IIngredient, IIngredientCreateInput } from '../types/models.types';
+import { IIngredient } from '../types/models.types';
 
-const db: Pool = require('../config/database');
+import db from '../config/database';
 
 class Ingredient {
   // Create or find ingredient by name

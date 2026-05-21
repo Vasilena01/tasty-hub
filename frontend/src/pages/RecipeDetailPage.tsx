@@ -128,7 +128,9 @@ const RecipeDetailPage: React.FC = () => {
             </div>
             <div className="meta-card">
               <span className="meta-icon">⭐</span>
-              <span className="meta-value">{recipe.average_rating?.toFixed(1) || '0.0'}</span>
+              <span className="meta-value">
+                {recipe.average_rating ? Number(recipe.average_rating).toFixed(1) : '0.0'}
+              </span>
               <span className="meta-label">{recipe.total_ratings || 0} ratings</span>
             </div>
           </div>

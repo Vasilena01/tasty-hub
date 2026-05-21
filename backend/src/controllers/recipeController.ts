@@ -1,14 +1,13 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import Recipe from '../models/Recipe';
 import Ingredient from '../models/Ingredient';
 import RecipeIngredient from '../models/RecipeIngredient';
 import { AuthRequest } from '../middleware/authMiddleware';
-import { ApiResponse } from '../types/api.types';
 import fs from 'fs';
 import path from 'path';
 
 // Create new recipe with image and ingredients
-const createRecipe = async (req: AuthRequest, res: Response<ApiResponse>): Promise<void> => {
+const createRecipe = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const {
       title,
@@ -27,18 +26,20 @@ const createRecipe = async (req: AuthRequest, res: Response<ApiResponse>): Promi
       if (req.file) {
         fs.unlinkSync(req.file.path);
       }
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: 'All fields are required'
       });
+      return;
     }
 
     // Check if image was uploaded
     if (!req.file) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: 'Recipe image is required'
       });
+      return;
     }
 
     // Build image URL (relative path)
@@ -53,10 +54,11 @@ const createRecipe = async (req: AuthRequest, res: Response<ApiResponse>): Promi
       if (req.file) {
         fs.unlinkSync(req.file.path);
       }
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: 'Invalid ingredients format'
       });
+      return;
     }
 
     // Validate ingredients array
@@ -64,15 +66,16 @@ const createRecipe = async (req: AuthRequest, res: Response<ApiResponse>): Promi
       if (req.file) {
         fs.unlinkSync(req.file.path);
       }
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: 'At least one ingredient is required'
       });
+      return;
     }
 
     // Create recipe
     const recipe = await Recipe.create({
-      user_id: req.user.id,
+      user_id: req.user!.id,
       title,
       description,
       category,
@@ -99,7 +102,8 @@ const createRecipe = async (req: AuthRequest, res: Response<ApiResponse>): Promi
 
     res.status(201).json({
       success: true,
-      recipe
+      message: 'Recipe created successfully',
+      data: recipe
     });
   } catch (error) {
     console.error('Create recipe error:', error);
@@ -121,15 +125,16 @@ const createRecipe = async (req: AuthRequest, res: Response<ApiResponse>): Promi
 };
 
 // Get recipe by ID with ingredients
-const getRecipeById = async (req, res) => {
+const getRecipeById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const recipe = await Recipe.findById(req.params.id);
+    const recipe = await Recipe.findById(parseInt(req.params.id as string));
 
     if (!recipe) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Recipe not found'
       });
+      return;
     }
 
     // Get ingredients for this recipe
@@ -137,7 +142,7 @@ const getRecipeById = async (req, res) => {
 
     res.json({
       success: true,
-      recipe: {
+      data: {
         ...recipe,
         ingredients
       }
@@ -152,7 +157,7 @@ const getRecipeById = async (req, res) => {
 };
 
 // Get all recipes with filters and pagination
-const getAllRecipes = async (req, res) => {
+const getAllRecipes = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const {
       category,
@@ -164,32 +169,37 @@ const getAllRecipes = async (req, res) => {
       limit = 12
     } = req.query;
 
-    const offset = (page - 1) * limit;
+    const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
 
     // Build filter parameters
     const filters = {
-      category,
-      difficulty,
-      minRating: minRating ? parseFloat(minRating) : null,
-      search,
-      sortBy,
-      limit: parseInt(limit),
+      category: category as string | undefined,
+      difficulty: difficulty as string | undefined,
+      minRating: minRating ? parseFloat(minRating as string) : undefined,
+      search: search as string | undefined,
+      sortBy: sortBy as string | undefined,
+      limit: parseInt(limit as string),
       offset
     };
 
     const recipes = await Recipe.findAll(filters);
 
     // Count total for pagination
-    const total = await Recipe.countAll({ category, difficulty, minRating: minRating ? parseFloat(minRating) : null, search });
+    const total = await Recipe.countAll({
+      category: category as string | undefined,
+      difficulty: difficulty as string | undefined,
+      minRating: minRating ? parseFloat(minRating as string) : undefined,
+      search: search as string | undefined
+    });
 
     res.json({
       success: true,
-      recipes,
+      data: recipes,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
         total,
-        totalPages: Math.ceil(total / limit)
+        totalPages: Math.ceil(total / parseInt(limit as string))
       }
     });
   } catch (error) {
@@ -202,13 +212,13 @@ const getAllRecipes = async (req, res) => {
 };
 
 // Get current user's recipes
-const getMyRecipes = async (req, res) => {
+const getMyRecipes = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const recipes = await Recipe.findByUserId(req.user.id);
+    const recipes = await Recipe.findByUserId(req.user!.id);
 
     res.json({
       success: true,
-      recipes
+      data: recipes
     });
   } catch (error) {
     console.error('Get my recipes error:', error);
@@ -220,14 +230,14 @@ const getMyRecipes = async (req, res) => {
 };
 
 // Get recipes by user ID
-const getRecipesByUserId = async (req, res) => {
+const getRecipesByUserId = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { userId } = req.params;
-    const recipes = await Recipe.findByUserId(userId);
+    const recipes = await Recipe.findByUserId(parseInt(userId as string));
 
     res.json({
       success: true,
-      recipes
+      data: recipes
     });
   } catch (error) {
     console.error('Get user recipes error:', error);
@@ -239,32 +249,34 @@ const getRecipesByUserId = async (req, res) => {
 };
 
 // Update recipe
-const updateRecipe = async (req, res) => {
+const updateRecipe = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     // Get existing recipe
-    const recipe = await Recipe.findById(req.params.id);
+    const recipe = await Recipe.findById(parseInt(req.params.id as string));
 
     if (!recipe) {
       // Clean up uploaded file if recipe not found
       if (req.file) {
         fs.unlinkSync(req.file.path);
       }
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Recipe not found'
       });
+      return;
     }
 
     // Check ownership
-    if (recipe.user_id !== req.user.id) {
+    if (recipe.user_id !== req.user!.id) {
       // Clean up uploaded file if not authorized
       if (req.file) {
         fs.unlinkSync(req.file.path);
       }
-      return res.status(403).json({
+      res.status(403).json({
         success: false,
         message: 'Not authorized to edit this recipe'
       });
+      return;
     }
 
     const {
@@ -279,7 +291,7 @@ const updateRecipe = async (req, res) => {
     } = req.body;
 
     // Build updates object (only include provided fields)
-    const updates = {};
+    const updates: any = {};
     if (title !== undefined) updates.title = title;
     if (description !== undefined) updates.description = description;
     if (category !== undefined) updates.category = category;
@@ -309,13 +321,13 @@ const updateRecipe = async (req, res) => {
         const ingredientList = JSON.parse(ingredients);
 
         // Delete existing ingredients
-        await RecipeIngredient.deleteByRecipeId(req.params.id);
+        await RecipeIngredient.deleteByRecipeId(parseInt(req.params.id as string));
 
         // Re-create ingredients
         for (const ing of ingredientList) {
           const ingredient = await Ingredient.findOrCreate(ing.name);
           await RecipeIngredient.create({
-            recipe_id: req.params.id,
+            recipe_id: parseInt(req.params.id as string),
             ingredient_id: ingredient.id,
             quantity: ing.quantity,
             unit: ing.unit
@@ -323,19 +335,20 @@ const updateRecipe = async (req, res) => {
         }
       } catch (error) {
         console.error('Error updating ingredients:', error);
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'Invalid ingredients format'
         });
+        return;
       }
     }
 
     // Update recipe
-    const updatedRecipe = await Recipe.update(req.params.id, updates);
+    const updatedRecipe = await Recipe.update(parseInt(req.params.id as string), updates);
 
     res.json({
       success: true,
-      recipe: updatedRecipe
+      data: updatedRecipe
     });
   } catch (error) {
     console.error('Update recipe error:', error);
@@ -357,24 +370,26 @@ const updateRecipe = async (req, res) => {
 };
 
 // Delete recipe
-const deleteRecipe = async (req, res) => {
+const deleteRecipe = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     // Get recipe
-    const recipe = await Recipe.findById(req.params.id);
+    const recipe = await Recipe.findById(parseInt(req.params.id as string));
 
     if (!recipe) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Recipe not found'
       });
+      return;
     }
 
     // Check ownership
-    if (recipe.user_id !== req.user.id) {
-      return res.status(403).json({
+    if (recipe.user_id !== req.user!.id) {
+      res.status(403).json({
         success: false,
         message: 'Not authorized to delete this recipe'
       });
+      return;
     }
 
     // Delete image file from filesystem
@@ -389,7 +404,7 @@ const deleteRecipe = async (req, res) => {
     }
 
     // Delete recipe (cascade deletes will handle related records)
-    await Recipe.delete(req.params.id);
+    await Recipe.delete(parseInt(req.params.id as string));
 
     res.json({
       success: true,
@@ -405,7 +420,7 @@ const deleteRecipe = async (req, res) => {
 };
 
 // Search recipes by ingredients
-const searchByIngredients = async (req, res) => {
+const searchByIngredients = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const {
       ingredients,
@@ -417,22 +432,23 @@ const searchByIngredients = async (req, res) => {
     } = req.query;
 
     // Validate ingredients parameter
-    if (!ingredients || !ingredients.trim()) {
-      return res.status(400).json({
+    if (!ingredients || !(ingredients as string).trim()) {
+      res.status(400).json({
         success: false,
         message: 'Ingredients parameter is required'
       });
+      return;
     }
 
-    const offset = (page - 1) * limit;
+    const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
 
     // Build filter parameters
     const filters = {
-      ingredients,
-      category,
-      difficulty,
-      minRating: minRating ? parseFloat(minRating) : null,
-      limit: parseInt(limit),
+      ingredients: ingredients as string,
+      category: category as string | undefined,
+      difficulty: difficulty as string | undefined,
+      minRating: minRating ? parseFloat(minRating as string) : undefined,
+      limit: parseInt(limit as string),
       offset
     };
 
@@ -440,20 +456,20 @@ const searchByIngredients = async (req, res) => {
 
     // Count total for pagination
     const total = await Recipe.countByIngredients({
-      ingredients,
-      category,
-      difficulty,
-      minRating: minRating ? parseFloat(minRating) : null
+      ingredients: ingredients as string,
+      category: category as string | undefined,
+      difficulty: difficulty as string | undefined,
+      minRating: minRating ? parseFloat(minRating as string) : undefined
     });
 
     res.json({
       success: true,
-      recipes,
+      data: recipes,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
         total,
-        totalPages: Math.ceil(total / limit)
+        totalPages: Math.ceil(total / parseInt(limit as string))
       }
     });
   } catch (error) {
@@ -466,7 +482,7 @@ const searchByIngredients = async (req, res) => {
 };
 
 // Get recipes from followed users
-const getFollowingRecipes = async (req, res) => {
+const getFollowingRecipes = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const {
       category,
@@ -478,17 +494,17 @@ const getFollowingRecipes = async (req, res) => {
       limit = 12
     } = req.query;
 
-    const offset = (page - 1) * limit;
+    const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
 
     // Build filter parameters
     const filters = {
-      userId: req.user.id,
-      category,
-      difficulty,
-      minRating: minRating ? parseFloat(minRating) : null,
-      search,
-      sortBy,
-      limit: parseInt(limit),
+      userId: req.user!.id,
+      category: category as string | undefined,
+      difficulty: difficulty as string | undefined,
+      minRating: minRating ? parseFloat(minRating as string) : undefined,
+      search: search as string | undefined,
+      sortBy: sortBy as string | undefined,
+      limit: parseInt(limit as string),
       offset
     };
 
@@ -496,21 +512,21 @@ const getFollowingRecipes = async (req, res) => {
 
     // Count total for pagination
     const total = await Recipe.countFromFollowedUsers({
-      userId: req.user.id,
-      category,
-      difficulty,
-      minRating: minRating ? parseFloat(minRating) : null,
-      search
+      userId: req.user!.id,
+      category: category as string | undefined,
+      difficulty: difficulty as string | undefined,
+      minRating: minRating ? parseFloat(minRating as string) : undefined,
+      search: search as string | undefined
     });
 
     res.json({
       success: true,
-      recipes,
+      data: recipes,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
         total,
-        totalPages: Math.ceil(total / limit)
+        totalPages: Math.ceil(total / parseInt(limit as string))
       }
     });
   } catch (error) {

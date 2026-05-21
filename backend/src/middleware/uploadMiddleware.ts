@@ -4,10 +4,10 @@ import { Request } from 'express';
 
 // Configure disk storage
 const storage: StorageEngine = multer.diskStorage({
-  destination: (req: Request, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void): void => {
+  destination: (_req: Request, _file: Express.Multer.File, cb: (error: Error | null, destination: string) => void): void => {
     cb(null, path.join(__dirname, '../../uploads/recipes'));
   },
-  filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void): void => {
+  filename: (_req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void): void => {
     // Generate unique filename: recipe-timestamp-randomstring-extension
     const uniqueSuffix: string = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, 'recipe-' + uniqueSuffix + path.extname(file.originalname));
@@ -15,7 +15,7 @@ const storage: StorageEngine = multer.diskStorage({
 });
 
 // File filter for images only
-const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback): void => {
+const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback): void => {
   const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);

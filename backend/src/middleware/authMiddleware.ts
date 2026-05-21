@@ -1,12 +1,25 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-// Custom request type with authenticated user data
-export interface AuthRequest extends Request {
+// Multer file type
+interface MulterFile {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  destination: string;
+  filename: string;
+  path: string;
+  size: number;
+}
+
+// Custom request type with authenticated user data and file upload support
+export interface AuthRequest extends Omit<Request, 'file'> {
   user?: {
     id: number;
     username: string;
   };
+  file?: MulterFile;
 }
 
 interface JwtPayload {

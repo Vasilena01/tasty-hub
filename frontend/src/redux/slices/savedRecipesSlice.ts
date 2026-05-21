@@ -27,9 +27,11 @@ export const fetchSavedRecipes = createAsyncThunk<
   async (_, { rejectWithValue }) => {
     try {
       const response = await savedRecipesService.fetchSavedRecipes();
-      // Backend returns { data: { recipes: Recipe[] } }
+      console.log('Fetched saved recipes:', response); // Debug log
+      // Backend returns { success: true, data: { recipes: [...] } }
       return response.data?.recipes || [];
     } catch (error: any) {
+      console.error('Error fetching saved recipes:', error); // Debug log
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch saved recipes');
     }
   }

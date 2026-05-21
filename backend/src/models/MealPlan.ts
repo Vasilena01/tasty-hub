@@ -1,7 +1,7 @@
 import { Pool, QueryResult } from 'pg';
 import { IMealPlan, IMealPlanCreateInput } from '../types/models.types';
 
-const db: Pool = require('../config/database');
+import db from '../config/database';
 
 class MealPlan {
   // Add recipe to meal plan (upsert - replaces existing if slot is occupied)

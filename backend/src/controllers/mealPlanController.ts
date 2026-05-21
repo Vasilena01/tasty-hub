@@ -3,7 +3,6 @@ import MealPlan from '../models/MealPlan';
 import Recipe from '../models/Recipe';
 import { AuthRequest } from '../middleware/authMiddleware';
 import { ApiResponse } from '../types/api.types';
-import { IMealPlan } from '../types/models.types';
 
 // Helper to extract string from params
 const getParamAsString = (param: string | string[]): string => {

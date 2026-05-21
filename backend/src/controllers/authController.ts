@@ -6,6 +6,7 @@ import { AuthRequest } from '../middleware/authMiddleware';
 import { ApiResponse, RegisterRequest, LoginRequest, AuthResponse } from '../types/api.types';
 import { IUser } from '../types/models.types';
 import { Pool, QueryResult } from 'pg';
+import pool from '../config/database';
 
 // Request body interface for registration
 interface RegisterRequestBody extends RegisterRequest {
@@ -297,8 +298,7 @@ const getAllUsers = async (
       ORDER BY recipe_count DESC, followers_count DESC
       LIMIT 50
     `;
-    const db: Pool = require('../config/database');
-    const result: QueryResult<UserDiscoveryResult> = await db.query(query);
+    const result: QueryResult<UserDiscoveryResult> = await pool.query(query);
 
     res.status(200).json({
       success: true,

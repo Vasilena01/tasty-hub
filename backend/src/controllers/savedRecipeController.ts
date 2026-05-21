@@ -40,8 +40,9 @@ const saveRecipe = async (
     // Check if already saved
     const alreadySaved = await SavedRecipe.isSaved(userId, parseInt(recipeId, 10));
     if (alreadySaved) {
-      res.status(400).json({
-        success: false,
+      // Return success if already saved (idempotent)
+      res.status(200).json({
+        success: true,
         message: 'Recipe already saved'
       });
       return;

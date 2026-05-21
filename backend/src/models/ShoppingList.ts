@@ -1,7 +1,7 @@
 import { Pool, QueryResult } from 'pg';
 import { IShoppingList, IShoppingListCreateInput, IShoppingListUpdateInput } from '../types/models.types';
 
-const db: Pool = require('../config/database');
+import db from '../config/database';
 
 class ShoppingList {
   // Create shopping list item

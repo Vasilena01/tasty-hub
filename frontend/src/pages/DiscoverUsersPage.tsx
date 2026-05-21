@@ -21,7 +21,7 @@ const DiscoverUsersPage: React.FC = () => {
   const fetchUsers = async () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_API_URL}/auth/users`);
-      setUsers(response.data.users);
+      setUsers(response.data.data);
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {

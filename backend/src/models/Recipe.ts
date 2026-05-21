@@ -1,7 +1,6 @@
 import { Pool, QueryResult } from 'pg';
 import { IRecipe, IRecipeCreateInput, IRecipeUpdateInput } from '../types/models.types';
-
-const db: Pool = require('../config/database');
+import db from '../config/database';
 
 interface RecipeQueryFilters {
   category?: string;

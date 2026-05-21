@@ -84,7 +84,7 @@ const generateShoppingList = async (
     }
 
     // Get all meal plans for the user and week
-    const mealPlans = await MealPlan.findByWeek(userId, weekStartDate);
+    const mealPlans = await MealPlan.findByWeek(userId, new Date(weekStartDate));
 
     if (mealPlans.length === 0) {
       res.status(400).json({
@@ -134,7 +134,7 @@ const generateShoppingList = async (
     // Convert aggregated object to array and add user_id and week_start_date
     const shoppingListItems = Object.values(aggregated).map((item: any) => ({
       user_id: userId,
-      week_start_date: weekStartDate,
+      week_start_date: new Date(weekStartDate),
       ingredient_name: item.ingredient_name,
       quantity: item.quantity.toString(),
       unit: item.unit,
@@ -142,7 +142,7 @@ const generateShoppingList = async (
     }));
 
     // Delete existing shopping list for this week
-    await ShoppingList.deleteByWeek(userId, weekStartDate);
+    await ShoppingList.deleteByWeek(userId, new Date(weekStartDate));
 
     // Bulk insert new shopping list items
     const createdItems = await ShoppingList.createMany(shoppingListItems);
@@ -194,7 +194,7 @@ const getShoppingListForWeek = async (
       return;
     }
 
-    const shoppingList = await ShoppingList.findByWeek(userId, weekStartDate);
+    const shoppingList = await ShoppingList.findByWeek(userId, new Date(weekStartDate));
 
     res.status(200).json({
       success: true,
@@ -448,7 +448,7 @@ const clearCheckedItems = async (
       return;
     }
 
-    await ShoppingList.deleteChecked(userId, weekStartDate);
+    await ShoppingList.deleteChecked(userId, new Date(weekStartDate));
 
     res.status(200).json({
       success: true,
@@ -493,7 +493,7 @@ const deleteShoppingList = async (
       return;
     }
 
-    await ShoppingList.deleteByWeek(userId, weekStartDate);
+    await ShoppingList.deleteByWeek(userId, new Date(weekStartDate));
 
     res.status(200).json({
       success: true,

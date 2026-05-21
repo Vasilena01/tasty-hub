@@ -1,7 +1,7 @@
 import { Pool, QueryResult } from 'pg';
 import { IRating, IRatingCreateInput } from '../types/models.types';
 
-const db: Pool = require('../config/database');
+import db from '../config/database';
 
 class Rating {
   // Create or update rating (upsert)

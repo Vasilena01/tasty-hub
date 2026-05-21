@@ -47,7 +47,14 @@ export const generateShoppingList = createAsyncThunk<
   async (weekStartDate, { rejectWithValue }) => {
     try {
       const response = await shoppingListService.generateShoppingList(weekStartDate);
-      return { weekStartDate, items: response.data || [], message: response.message || 'Shopping list generated successfully' };
+      // Backend returns { data: { items: [...], itemCount: number } }
+      const responseData = response.data as any;
+      const items = responseData?.items || [];
+      return {
+        weekStartDate,
+        items: Array.isArray(items) ? items : [],
+        message: response.message || 'Shopping list generated successfully'
+      };
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to generate shopping list');
     }
@@ -63,7 +70,11 @@ export const fetchShoppingList = createAsyncThunk<
   async (weekStartDate, { rejectWithValue }) => {
     try {
       const response = await shoppingListService.getShoppingListForWeek(weekStartDate);
-      return { weekStartDate, items: response.data || [] };
+      const items = response.data || [];
+      return {
+        weekStartDate,
+        items: Array.isArray(items) ? items : []
+      };
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch shopping list');
     }
